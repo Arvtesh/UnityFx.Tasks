@@ -17,10 +17,24 @@ namespace UnityFx.Tasks
 
 		private static SynchronizationContext _mainThreadContext;
 		private static TaskUtilityBehaviour _rootBehaviour;
+		private static SendOrPostCallback _startCoroutineCallback;
+		private static SendOrPostCallback _stopCoroutineCallback;
+		private static SendOrPostCallback _stopAllCoroutinesCallback;
 
 		#endregion
 
 		#region interface
+
+		/// <summary>
+		/// Gets a value indicating whether the current thread is Unity main thread.
+		/// </summary>
+		public static bool IsUnityThread
+		{
+			get
+			{
+				return SynchronizationContext.Current == _mainThreadContext;
+			}
+		}
 
 		/// <summary>
 		/// Starts a coroutine.
@@ -31,28 +45,25 @@ namespace UnityFx.Tasks
 		/// <seealso cref="StopCoroutine(Coroutine)"/>
 		/// <seealso cref="StopCoroutine(IEnumerator)"/>
 		/// <seealso cref="StopAllCoroutines"/>
-		public static Coroutine StartCoroutine(IEnumerator enumerator)
+		public static void StartCoroutine(IEnumerator enumerator)
 		{
 			if (enumerator == null)
 			{
 				throw new ArgumentNullException("enumerator");
 			}
 
-			return _rootBehaviour.StartCoroutine(enumerator);
-		}
-
-		/// <summary>
-		/// Stops the specified coroutine.
-		/// </summary>
-		/// <param name="coroutine">The coroutine to stop.</param>
-		/// <seealso cref="StartCoroutine(IEnumerator)"/>
-		/// <seealso cref="StopCoroutine(IEnumerator)"/>
-		/// <seealso cref="StopAllCoroutines"/>
-		public static void StopCoroutine(Coroutine coroutine)
-		{
-			if (coroutine != null && _rootBehaviour)
+			if (SynchronizationContext.Current == _mainThreadContext)
 			{
-				_rootBehaviour.StopCoroutine(coroutine);
+				_rootBehaviour.StartCoroutine(enumerator);
+			}
+			else
+			{
+				if (_startCoroutineCallback == null)
+				{
+					_startCoroutineCallback = state => _rootBehaviour.StartCoroutine(state as IEnumerator);
+				}
+
+				_mainThreadContext.Post(_startCoroutineCallback, enumerator);
 			}
 		}
 
@@ -67,7 +78,19 @@ namespace UnityFx.Tasks
 		{
 			if (enumerator != null && _rootBehaviour)
 			{
-				_rootBehaviour.StopCoroutine(enumerator);
+				if (SynchronizationContext.Current == _mainThreadContext)
+				{
+					_rootBehaviour.StopCoroutine(enumerator);
+				}
+				else
+				{
+					if (_stopCoroutineCallback == null)
+					{
+						_stopCoroutineCallback = state => _rootBehaviour.StopCoroutine(state as IEnumerator);
+					}
+
+					_mainThreadContext.Post(_stopCoroutineCallback, enumerator);
+				}
 			}
 		}
 
@@ -81,7 +104,19 @@ namespace UnityFx.Tasks
 		{
 			if (_rootBehaviour)
 			{
-				_rootBehaviour.StopAllCoroutines();
+				if (SynchronizationContext.Current == _mainThreadContext)
+				{
+					_rootBehaviour.StopAllCoroutines();
+				}
+				else
+				{
+					if (_stopAllCoroutinesCallback == null)
+					{
+						_stopAllCoroutinesCallback = state => _rootBehaviour.StopAllCoroutines();
+					}
+
+					_mainThreadContext.Post(_stopAllCoroutinesCallback, null);
+				}
 			}
 		}
 

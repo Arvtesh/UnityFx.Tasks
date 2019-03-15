@@ -58,7 +58,7 @@ namespace UnityFx.Tasks.CompilerServices
 
 		#region IEnumerator
 
-		public object Current
+		object IEnumerator.Current
 		{
 			get
 			{
@@ -66,7 +66,7 @@ namespace UnityFx.Tasks.CompilerServices
 			}
 		}
 
-		public bool MoveNext()
+		bool IEnumerator.MoveNext()
 		{
 			if (_yieldValue != null)
 			{
@@ -86,7 +86,7 @@ namespace UnityFx.Tasks.CompilerServices
 			return false;
 		}
 
-		public void Reset()
+		void IEnumerator.Reset()
 		{
 			throw new NotSupportedException();
 		}

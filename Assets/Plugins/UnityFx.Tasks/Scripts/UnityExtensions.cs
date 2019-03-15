@@ -21,12 +21,21 @@ namespace UnityFx.Tasks
 		#region interface
 
 		/// <summary>
-		/// Returns the operation awaiter. This method is intended for compiler use only.
+		/// Returns the <see cref="AsyncOperation"/> awaiter. This method is intended for compiler use only.
 		/// </summary>
 		/// <param name="op">The operation to await.</param>
 		public static CompilerServices.AsyncOperationAwaiter GetAwaiter(this AsyncOperation op)
 		{
 			return new CompilerServices.AsyncOperationAwaiter(op);
+		}
+
+		/// <summary>
+		/// Returns the <see cref="YieldInstruction"/> awaiter. This method is intended for compiler use only.
+		/// </summary>
+		/// <param name="op">The operation to await.</param>
+		public static CompilerServices.YieldInstructionAwaiter GetAwaiter(this YieldInstruction op)
+		{
+			return new CompilerServices.YieldInstructionAwaiter(op);
 		}
 
 		#endregion
