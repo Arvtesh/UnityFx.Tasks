@@ -8,15 +8,15 @@ using UnityEngine;
 namespace UnityFx.Tasks.CompilerServices
 {
 	/// <summary>
-	/// Provides an awaitable object that allows for configured awaits on <see cref="AsyncOperation"/>.
+	/// Provides an awaitable object that allows for configured awaits on <see cref="AssetBundleRequest"/>.
 	/// This type is intended for compiler use only.
 	/// </summary>
 	/// <seealso cref="AsyncOperation"/>
-	public struct AsyncOperationAwaiter : INotifyCompletion
+	public struct AssetBundleCreateRequestAwaiter : INotifyCompletion
 	{
-		private readonly AsyncOperation _op;
+		private readonly AssetBundleCreateRequest _op;
 
-		public AsyncOperationAwaiter(AsyncOperation op)
+		public AssetBundleCreateRequestAwaiter(AssetBundleCreateRequest op)
 		{
 			_op = op;
 		}
@@ -29,8 +29,14 @@ namespace UnityFx.Tasks.CompilerServices
 			}
 		}
 
-		public void GetResult()
+		public AssetBundle GetResult()
 		{
+			if (!_op.assetBundle)
+			{
+				throw new InvalidOperationException();
+			}
+
+			return _op.assetBundle;
 		}
 
 		public void OnCompleted(Action continuation)

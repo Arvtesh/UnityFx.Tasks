@@ -8,8 +8,6 @@ using UnityEngine;
 
 namespace UnityFx.Tasks
 {
-#if !NET_LEGACY && !NET_2_0 && !NET_2_0_SUBSET
-
 	/// <summary>
 	/// Extensions of <see cref="Task"/>.
 	/// </summary>
@@ -21,10 +19,10 @@ namespace UnityFx.Tasks
 		#region interface
 
 		/// <summary>
-		/// Converts the operation (task) to a <see cref="IEnumerator"/> instance that can be used as Unity coroutine.
+		/// Converts the operation (task) to a <see cref="IEnumerator"/> instance that can be used in Unity coroutine.
 		/// </summary>
 		/// <param name="op">The source operation (task).</param>
-		public static IEnumerator ToCoroutine(this IAsyncResult op)
+		public static IEnumerator ToEnumerator(this IAsyncResult op)
 		{
 			return new TaskEnumerator(op);
 		}
@@ -63,6 +61,4 @@ namespace UnityFx.Tasks
 
 		#endregion
 	}
-
-#endif
 }

@@ -2,17 +2,13 @@
 // Licensed under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using System;
-#if NET_4_6 || NET_STANDARD_2_0
 using System.Collections.Concurrent;
 using System.Runtime.ExceptionServices;
-#endif
 using System.Threading;
 using UnityEngine;
 
 namespace UnityFx.Tasks.Helpers
 {
-#if !NET_LEGACY && !NET_2_0 && !NET_2_0_SUBSET
-
 	/// <summary>
 	/// Implementation of <see cref="SynchronizationContext"/> for Unity.
 	/// </summary>
@@ -130,6 +126,4 @@ namespace UnityFx.Tasks.Helpers
 
 		#endregion
 	}
-
-#endif
 }

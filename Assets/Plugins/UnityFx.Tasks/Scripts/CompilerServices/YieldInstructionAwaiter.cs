@@ -8,8 +8,6 @@ using UnityEngine;
 
 namespace UnityFx.Tasks.CompilerServices
 {
-#if NET_4_6 || NET_STANDARD_2_0
-
 	/// <summary>
 	/// Provides an awaitable object that allows for configured awaits on <see cref="YieldInstruction"/>.
 	/// This type is intended for compiler use only.
@@ -51,6 +49,8 @@ namespace UnityFx.Tasks.CompilerServices
 		public void OnCompleted(Action continuation)
 		{
 			_callback = continuation;
+
+			// NOTE: This call always schedules the continuation on the Unity thread. This differs from Task awaiter behavior (continue on the same thread).
 			TaskUtility.StartCoroutine(this);
 		}
 
@@ -93,6 +93,4 @@ namespace UnityFx.Tasks.CompilerServices
 
 		#endregion
 	}
-
-#endif
 }

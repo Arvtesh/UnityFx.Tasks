@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace UnityFx.Tasks
@@ -37,7 +38,7 @@ namespace UnityFx.Tasks
 		}
 
 		/// <summary>
-		/// Starts a coroutine.
+		/// Starts a coroutine. Can be called from non-Unity thread.
 		/// </summary>
 		/// <param name="enumerator">The coroutine to run.</param>
 		/// <returns>Returns the coroutine handle.</returns>
@@ -68,7 +69,7 @@ namespace UnityFx.Tasks
 		}
 
 		/// <summary>
-		/// Stops the specified coroutine.
+		/// Stops the specified coroutine. Can be called from non-Unity thread.
 		/// </summary>
 		/// <param name="enumerator">The coroutine to stop.</param>
 		/// <seealso cref="StartCoroutine(IEnumerator)"/>
@@ -95,7 +96,7 @@ namespace UnityFx.Tasks
 		}
 
 		/// <summary>
-		/// Stops all coroutines.
+		/// Stops all coroutines. Can be called from non-Unity thread.
 		/// </summary>
 		/// <seealso cref="StartCoroutine(IEnumerator)"/>
 		/// <seealso cref="StopCoroutine(Coroutine)"/>
@@ -122,6 +123,12 @@ namespace UnityFx.Tasks
 
 		internal static void Initialize(GameObject go, SynchronizationContext mainThreadContext)
 		{
+			// NOTE: Should only be called once.
+			if (_rootBehaviour)
+			{
+				throw new InvalidOperationException();
+			}
+
 			_mainThreadContext = mainThreadContext;
 			_rootBehaviour = go.AddComponent<TaskUtilityBehaviour>();
 		}
@@ -132,12 +139,16 @@ namespace UnityFx.Tasks
 
 		private sealed class TaskUtilityBehaviour : MonoBehaviour
 		{
+			private Helpers.UnitySynchronizationContext _context;
+
+			private void Awake()
+			{
+				_context = _mainThreadContext as Helpers.UnitySynchronizationContext;
+			}
+
 			private void Update()
 			{
-				if (_mainThreadContext is Helpers.UnitySynchronizationContext)
-				{
-					(_mainThreadContext as Helpers.UnitySynchronizationContext).Update(this);
-				}
+				_context?.Update(this);
 			}
 		}
 
