@@ -1,6 +1,6 @@
 # UnityFx.Tasks
 
-**Requires Unity 2017.1 or higher.**
+**Requires Unity 2017.2 or higher.**
 
 ## Synopsis
 
