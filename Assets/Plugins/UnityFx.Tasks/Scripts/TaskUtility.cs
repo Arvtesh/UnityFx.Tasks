@@ -3,9 +3,11 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace UnityFx.Tasks
 {
@@ -133,13 +135,31 @@ namespace UnityFx.Tasks
 			_rootBehaviour = go.AddComponent<TaskUtilityBehaviour>();
 		}
 
+		internal static void AddCompletionCallback(UnityWebRequest request, Action action)
+		{
+			_rootBehaviour.AddCompletionCallback(request, action);
+		}
+
 		#endregion
 
 		#region implementation
 
 		private sealed class TaskUtilityBehaviour : MonoBehaviour
 		{
+			private Dictionary<UnityWebRequest, Action> _ops;
+			private List<KeyValuePair<UnityWebRequest, Action>> _opsToRemove;
 			private Helpers.UnitySynchronizationContext _context;
+
+			public void AddCompletionCallback(UnityWebRequest op, Action cb)
+			{
+				if (_ops == null)
+				{
+					_ops = new Dictionary<UnityWebRequest, Action>();
+					_opsToRemove = new List<KeyValuePair<UnityWebRequest, Action>>();
+				}
+
+				_ops.Add(op, cb);
+			}
 
 			private void Awake()
 			{
@@ -148,6 +168,33 @@ namespace UnityFx.Tasks
 
 			private void Update()
 			{
+				if (_ops != null && _ops.Count > 0)
+				{
+					foreach (var item in _ops)
+					{
+						if (item.Key.isDone)
+						{
+							_opsToRemove.Add(item);
+						}
+					}
+
+					foreach (var item in _opsToRemove)
+					{
+						_ops.Remove(item.Key);
+
+						try
+						{
+							item.Value();
+						}
+						catch (Exception e)
+						{
+							Debug.LogException(e, this);
+						}
+					}
+
+					_opsToRemove.Clear();
+				}
+
 				_context?.Update(this);
 			}
 		}

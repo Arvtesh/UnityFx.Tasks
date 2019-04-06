@@ -24,6 +24,11 @@ namespace UnityFx.Tasks
 		/// <param name="op">The source operation (task).</param>
 		public static IEnumerator ToEnumerator(this IAsyncResult op)
 		{
+			if (op is IEnumerator)
+			{
+				return op as IEnumerator;
+			}
+
 			return new TaskEnumerator(op);
 		}
 
