@@ -12,5 +12,4 @@ mailto:arvtesh@gmail.com
 
 USEFUL LINKS
 Github project: https://github.com/Arvtesh/UnityFx.Tasks
-Unity Asset Store: https://assetstore.unity.com/packages/tools/TODO
-Unity Forums: https://forum.unity.com/threads/TODO
+Unity Asset Store: https://assetstore.unity.com/packages/slug/143705
