@@ -38,8 +38,7 @@ namespace UnityFx.Tasks.CompilerServices
 
 		public void OnCompleted(Action continuation)
 		{
-			_request.ThrowIfNonModifiable();
-			_request.SendWebRequest().completed += op => continuation();
+			TaskUtility.AddCompletionCallback(_request, continuation);
 		}
 	}
 }

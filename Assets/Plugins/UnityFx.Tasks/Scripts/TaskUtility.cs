@@ -72,7 +72,7 @@ namespace UnityFx.Tasks
 			{
 				cancellationToken.Register(() =>
 				{
-					result.TrySetCanceled();
+					result.TrySetCanceled(cancellationToken);
 				});
 			}
 

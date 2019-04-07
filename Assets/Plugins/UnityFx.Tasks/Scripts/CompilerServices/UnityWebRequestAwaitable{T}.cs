@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using System;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -12,32 +11,20 @@ namespace UnityFx.Tasks.CompilerServices
 	/// Provides an awaitable object that allows for configured awaits on <see cref="UnityWebRequest"/>.
 	/// This type is intended for compiler use only.
 	/// </summary>
+	/// <seealso cref="UnityWebRequestAwaiter{T}"/>
 	/// <seealso cref="UnityWebRequest"/>
-	public struct UnityWebRequestAwaiter<T> : INotifyCompletion where T : class
+	public struct UnityWebRequestAwaitable<T> where T : class
 	{
-		private readonly UnityWebRequest _request;
+		private readonly UnityWebRequestAwaiter<T> _awaiter;
 
-		public UnityWebRequestAwaiter(UnityWebRequest op)
+		public UnityWebRequestAwaitable(UnityWebRequest op)
 		{
-			_request = op;
+			_awaiter = new UnityWebRequestAwaiter<T>(op);
 		}
 
-		public bool IsCompleted
+		public UnityWebRequestAwaiter<T> GetAwaiter()
 		{
-			get
-			{
-				return _request.isDone;
-			}
-		}
-
-		public T GetResult()
-		{
-			return _request.GetResult<T>();
-		}
-
-		public void OnCompleted(Action continuation)
-		{
-			TaskUtility.AddCompletionCallback(_request, continuation);
+			return _awaiter;
 		}
 	}
 }

@@ -18,6 +18,15 @@ namespace UnityFx.Tasks
 		#region interface
 
 		/// <summary>
+		/// Creates a configurable awaitable object for the <see cref="UnityWebRequest"/> instance.
+		/// </summary>
+		/// <param name="request">The source web request.</param>
+		public static CompilerServices.UnityWebRequestAwaitable<T> ConfigureAwait<T>(this UnityWebRequest request) where T : class
+		{
+			return new CompilerServices.UnityWebRequestAwaitable<T>(request);
+		}
+
+		/// <summary>
 		/// Creates an <see cref="Task"/> wrapper for the specified <see cref="UnityWebRequest"/>. The method calls <see cref="UnityWebRequest.SendWebRequest"/> (if not called).
 		/// </summary>
 		/// <param name="request">The source web request.</param>
