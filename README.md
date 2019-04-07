@@ -4,7 +4,7 @@
 
 ## Synopsis
 
-*UnityFx.Tasks* provides a set of extension methods and utilities to make [async/await](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/) in [Unity3d](https://unity3d.com) available.
+At this moment [Unity3d](https://unity3d.com) does not provide support neither for [Tasks](https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) nor for [async/await](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/). The goal of the library is closing this gap. *UnityFx.Tasks* provides a set of extension methods and utilities to make [async/await](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/) in [Unity3d](https://unity3d.com) available.
 
 ## Getting Started
 ### Prerequisites
@@ -19,12 +19,24 @@ git clone https://github.com/Arvtesh/UnityFx.Tasks.git
 git submodule -q update --init
 ```
 ### Getting binaries
-The [Unity Asset Store package](https://assetstore.unity.com/packages/slug/143705) can be installed using the editor. One can also download it directly from [Github releases](https://github.com/Arvtesh/UnityFx.Tasks/releases)
+The [Unity Asset Store package](https://assetstore.unity.com/packages/slug/143705) can be installed using the editor. One can also download it directly from [Github releases](https://github.com/Arvtesh/UnityFx.Tasks/releases).
 
 ## Using the library
-Import the namespace:
+The library tools are locates in a single namespace:
 ```csharp
 using UnityFx.Tasks;
+```
+All built-in Unity asynchronous operations have dedicated awaiters and thus are awaitable:
+```csharp
+await new WaitForSeconds(1);
+await UnityWebRequestAssetBundle.GetAssetBundle(url);
+await StartCoroutine(SomeCoroutine());
+await SceneManager.LoadSceneAsync("myScene");
+```
+There are also [Task](https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.task) conversions for standard operations:
+```csharp
+var task = UnityWebRequestAssetBundle.GetAssetBundle(url).ToTask<AssetBundle>();
+var assetBundle = await task;
 ```
 The following sample demonstrates loading a scene packed in an asset bundle:
 ```csharp
@@ -51,7 +63,6 @@ public static async Task<Scene> LoadSceneFromAssetBundle(string url)
 	}
 }
 ```
-
 Converting a coroutine to a task is easy:
 ```csharp
 private IEnumerator SomeCoroutine(TaskCompletionSource<int> completionSource)
