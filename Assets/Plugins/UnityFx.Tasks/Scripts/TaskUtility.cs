@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 namespace UnityFx.Tasks
 {
@@ -40,16 +41,80 @@ namespace UnityFx.Tasks
 		}
 
 		/// <summary>
+		/// Asynchronously loads a scene with the specified name.
+		/// </summary>
+		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
+		/// <param name="loadMode">The scene load mode.</param>
+		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation progress.</returns>
+		public static Task<Scene> LoadSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single)
+		{
+			return LoadSceneAsync(sceneName, loadMode);
+		}
+
+		/// <summary>
+		/// Asynchronously loads a scene with the specified name.
+		/// </summary>
+		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
+		/// <param name="loadMode">The scene load mode.</param>
+		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation progress.</returns>
+		public static Task<Scene> LoadSceneAsync(string sceneName, LoadSceneMode loadMode, CancellationToken cancellationToken)
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled<Scene>(cancellationToken);
+			}
+
+			var op = SceneManager.LoadSceneAsync(sceneName, loadMode);
+			var result = new TaskCompletionSource<Scene>(op);
+
+			if (cancellationToken.CanBeCanceled)
+			{
+				cancellationToken.Register(() =>
+				{
+					result.TrySetCanceled();
+				});
+			}
+
+			op.completed += o =>
+			{
+				var scene = default(Scene);
+
+				// NOTE: Grab the last scene with the specified name from the list of loaded scenes.
+				for (var i = SceneManager.sceneCount - 1; i >= 0; --i)
+				{
+					var s = SceneManager.GetSceneAt(i);
+
+					if (s.name == sceneName)
+					{
+						scene = s;
+						break;
+					}
+				}
+
+				if (scene.isLoaded)
+				{
+					result.TrySetResult(scene);
+				}
+				else
+				{
+					result.TrySetException(new UnityAssetLoadException(sceneName, typeof(Scene)));
+				}
+			};
+
+			return result.Task;
+		}
+
+		/// <summary>
 		/// Starts a coroutine and wraps it with <see cref="Task{TResult}"/>.
 		/// </summary>
 		/// <param name="coroutineFunc">The coroutine delegate.</param>
-		/// <param name="userState">User-defined state.</param>
 		/// <returns>Returns the coroutine handle.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="coroutineFunc"/> is <see langword="null"/>.</exception>
 		/// <seealso cref="FromCoroutine(Func{IAsyncCompletionSource, IEnumerator}, object)"/>
-		public static Task<T> FromCoroutine<T>(Func<TaskCompletionSource<T>, IEnumerator> coroutineFunc, object userState = null)
+		public static Task<T> FromCoroutine<T>(Func<TaskCompletionSource<T>, IEnumerator> coroutineFunc)
 		{
-			return FromCoroutine<T>(coroutineFunc, CancellationToken.None, userState);
+			return FromCoroutine(coroutineFunc, CancellationToken.None);
 		}
 
 		/// <summary>
@@ -57,11 +122,10 @@ namespace UnityFx.Tasks
 		/// </summary>
 		/// <param name="coroutineFunc">The coroutine delegate.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
-		/// <param name="userState">User-defined state.</param>
 		/// <returns>Returns the coroutine handle.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="coroutineFunc"/> is <see langword="null"/>.</exception>
 		/// <seealso cref="FromCoroutine(Func{IAsyncCompletionSource, IEnumerator}, object)"/>
-		public static Task<T> FromCoroutine<T>(Func<TaskCompletionSource<T>, IEnumerator> coroutineFunc, CancellationToken cancellationToken, object userState = null)
+		public static Task<T> FromCoroutine<T>(Func<TaskCompletionSource<T>, IEnumerator> coroutineFunc, CancellationToken cancellationToken)
 		{
 			if (coroutineFunc == null)
 			{
@@ -73,7 +137,7 @@ namespace UnityFx.Tasks
 				return Task.FromCanceled<T>(cancellationToken);
 			}
 
-			var result = new TaskCompletionSource<T>(userState);
+			var result = new TaskCompletionSource<T>();
 			var enumOp = CoroutineWrapperEnum(coroutineFunc(result), result);
 
 			if (cancellationToken.CanBeCanceled)

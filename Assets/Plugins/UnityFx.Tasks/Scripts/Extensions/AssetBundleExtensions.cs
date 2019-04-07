@@ -83,8 +83,19 @@ namespace UnityFx.Tasks
 		/// <param name="assetBundle">The source asset bundle.</param>
 		/// <param name="loadMode">The scene load mode.</param>
 		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
-		/// <param name="userState">User-defined data to pass to the resulting <see cref="Task{TResult}"/>.</param>
-		public static Task<Scene> LoadSceneTaskAsync(this AssetBundle assetBundle, LoadSceneMode loadMode, string sceneName = null, object userState = null)
+		public static Task<Scene> LoadSceneTaskAsync(this AssetBundle assetBundle, LoadSceneMode loadMode, string sceneName = null)
+		{
+			return LoadSceneTaskAsync(assetBundle, loadMode, sceneName, CancellationToken.None);
+		}
+
+		/// <summary>
+		/// Loads a <see cref="Scene"/> from an asset bundle.
+		/// </summary>
+		/// <param name="assetBundle">The source asset bundle.</param>
+		/// <param name="loadMode">The scene load mode.</param>
+		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
+		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+		public static Task<Scene> LoadSceneTaskAsync(this AssetBundle assetBundle, LoadSceneMode loadMode, string sceneName, CancellationToken cancellationToken)
 		{
 			if (!assetBundle.isStreamedSceneAssetBundle)
 			{
@@ -106,36 +117,7 @@ namespace UnityFx.Tasks
 				}
 			}
 
-			var result = new TaskCompletionSource<Scene>(userState);
-			var op = SceneManager.LoadSceneAsync(sceneName, loadMode);
-
-			op.completed += o =>
-			{
-				var scene = default(Scene);
-
-				// NOTE: Grab the last scene with the specified name from the list of loaded scenes.
-				for (var i = SceneManager.sceneCount - 1; i >= 0; --i)
-				{
-					var s = SceneManager.GetSceneAt(i);
-
-					if (s.name == sceneName)
-					{
-						scene = s;
-						break;
-					}
-				}
-
-				if (scene.isLoaded)
-				{
-					result.TrySetResult(scene);
-				}
-				else
-				{
-					result.TrySetException(new UnityAssetLoadException(sceneName, typeof(Scene)));
-				}
-			};
-
-			return result.Task;
+			return TaskUtility.LoadSceneAsync(sceneName, loadMode, cancellationToken);
 		}
 
 		/// <summary>
