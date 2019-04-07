@@ -40,6 +40,59 @@ namespace UnityFx.Tasks
 		}
 
 		/// <summary>
+		/// Starts a coroutine and wraps it with <see cref="Task{TResult}"/>.
+		/// </summary>
+		/// <param name="coroutineFunc">The coroutine delegate.</param>
+		/// <param name="userState">User-defined state.</param>
+		/// <returns>Returns the coroutine handle.</returns>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="coroutineFunc"/> is <see langword="null"/>.</exception>
+		/// <seealso cref="FromCoroutine(Func{IAsyncCompletionSource, IEnumerator}, object)"/>
+		public static Task<T> FromCoroutine<T>(Func<TaskCompletionSource<T>, IEnumerator> coroutineFunc, object userState = null)
+		{
+			return FromCoroutine<T>(coroutineFunc, CancellationToken.None, userState);
+		}
+
+		/// <summary>
+		/// Starts a coroutine and wraps it with <see cref="Task{TResult}"/>.
+		/// </summary>
+		/// <param name="coroutineFunc">The coroutine delegate.</param>
+		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+		/// <param name="userState">User-defined state.</param>
+		/// <returns>Returns the coroutine handle.</returns>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="coroutineFunc"/> is <see langword="null"/>.</exception>
+		/// <seealso cref="FromCoroutine(Func{IAsyncCompletionSource, IEnumerator}, object)"/>
+		public static Task<T> FromCoroutine<T>(Func<TaskCompletionSource<T>, IEnumerator> coroutineFunc, CancellationToken cancellationToken, object userState = null)
+		{
+			if (coroutineFunc == null)
+			{
+				throw new ArgumentNullException("coroutineFunc");
+			}
+
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled<T>(cancellationToken);
+			}
+
+			var result = new TaskCompletionSource<T>(userState);
+			var enumOp = CoroutineWrapperEnum(coroutineFunc(result), result);
+
+			if (cancellationToken.CanBeCanceled)
+			{
+				cancellationToken.Register(() =>
+				{
+					if (result.TrySetCanceled(cancellationToken))
+					{
+						_rootBehaviour.StopCoroutine(enumOp);
+					}
+				},
+				true);
+			}
+
+			_rootBehaviour.StartCoroutine(enumOp);
+			return result.Task;
+		}
+
+		/// <summary>
 		/// Starts a coroutine. Can be called from non-Unity thread.
 		/// </summary>
 		/// <param name="enumerator">The coroutine to run.</param>
@@ -52,7 +105,7 @@ namespace UnityFx.Tasks
 		{
 			if (enumerator == null)
 			{
-				throw new ArgumentNullException("enumerator");
+				throw new ArgumentNullException(nameof(enumerator));
 			}
 
 			if (SynchronizationContext.Current == _mainThreadContext)
@@ -197,6 +250,12 @@ namespace UnityFx.Tasks
 
 				_context?.Update(this);
 			}
+		}
+
+		private static IEnumerator CoroutineWrapperEnum<T>(IEnumerator workerEnum, TaskCompletionSource<T> tcs)
+		{
+			yield return workerEnum;
+			tcs.TrySetResult(default(T));
 		}
 
 		#endregion

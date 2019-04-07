@@ -35,15 +35,6 @@ namespace UnityFx.Tasks
 		{
 			if (cancellationToken.IsCancellationRequested)
 			{
-				if (op.isDone)
-				{
-					DestroyAssets(op);
-				}
-				else
-				{
-					op.completed += OnCancelledOperationCompleted;
-				}
-
 				return Task.FromCanceled<T>(cancellationToken);
 			}
 
@@ -66,12 +57,8 @@ namespace UnityFx.Tasks
 				{
 					cancellationToken.Register(() =>
 					{
-						if (result.TrySetCanceled(cancellationToken))
-						{
-							op.completed += OnCancelledOperationCompleted;
-						}
-					},
-					true);
+						result.TrySetCanceled(cancellationToken);
+					});
 				}
 
 				op.completed += o =>
