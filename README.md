@@ -1,16 +1,16 @@
 # UnityFx.Tasks
 
-**Requires Unity 2017.1 or higher.**
+**Requires Unity 2017.2 or higher.**
 
 ## Synopsis
 
-*UnityFx.Tasks* provides a set of extension methods and utilities to make using [async/await](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/) in [Unity3d](https://unity3d.com) more convenient.
+At this moment [Unity3d](https://unity3d.com) does not provide support neither for [Tasks](https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) nor for [async/await](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/). The goal of the library is closing this gap. *UnityFx.Tasks* provides a set of extension methods and utilities to make [async/await](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/) in [Unity3d](https://unity3d.com) available.
 
 ## Getting Started
 ### Prerequisites
 You may need the following software installed in order to build/use the library:
 - [Microsoft Visual Studio 2017](https://www.visualstudio.com/vs/community/).
-- [Unity3d](https://store.unity.com/) (the minimum supported version is **2017.1**).
+- [Unity3d](https://store.unity.com/) (the minimum supported version is **2017.2**).
 
 ### Getting the code
 You can get the code by cloning the github repository using your preffered git client UI or you can do it from command line as follows:
@@ -19,10 +19,61 @@ git clone https://github.com/Arvtesh/UnityFx.Tasks.git
 git submodule -q update --init
 ```
 ### Getting binaries
-The [Unity Asset Store package](https://assetstore.unity.com/packages/tools/tt) can be installed using the editor. One can also download it directly from [Github releases](https://github.com/Arvtesh/UnityFx.Tasks/releases)
+The [Unity Asset Store package](https://assetstore.unity.com/packages/slug/143705) can be installed using the editor. One can also download it directly from [Github releases](https://github.com/Arvtesh/UnityFx.Tasks/releases).
 
 ## Using the library
-TODO
+The library tools are locates in a single namespace:
+```csharp
+using UnityFx.Tasks;
+```
+All built-in Unity asynchronous operations have dedicated awaiters and thus are awaitable:
+```csharp
+await new WaitForSeconds(1);
+await UnityWebRequestAssetBundle.GetAssetBundle(url);
+await StartCoroutine(SomeCoroutine());
+await SceneManager.LoadSceneAsync("myScene");
+```
+There are also [Task](https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.task) conversions for standard operations:
+```csharp
+var task = UnityWebRequestAssetBundle.GetAssetBundle(url).ToTask<AssetBundle>();
+var assetBundle = await task;
+```
+The following sample demonstrates loading a scene packed in an asset bundle:
+```csharp
+using System;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityFx.Tasks;
+
+public static async Task<Scene> LoadSceneFromAssetBundle(string url)
+{
+	using (var www = UnityWebRequestAssetBundle.GetAssetBundle(url))
+	{
+		var assetBundle = await www.ConfigureAwait<AssetBundle>();
+
+		try
+		{
+			return await assetBundle.LoadSceneTaskAsync(LoadSceneMode.Single);
+		}
+		finally
+		{
+			assetBundle.Unload(false);
+		}
+	}
+}
+```
+Converting a coroutine to a task is easy:
+```csharp
+private IEnumerator SomeCoroutine(TaskCompletionSource<int> completionSource)
+{
+	yield return new WaitForSeconds(1);
+	completionSource.TrySetResult(10);
+}
+
+// Start the coroutine. Note that you do not require a MonoBehaviour instance to do this.
+var task = TaskUtility.FromCoroutine(SomeCoroutine);
+```
 
 ## Motivation
 The project was initially created to help author with his [Unity3d](https://unity3d.com) projects. Unity doesn't adapt their APIs to the [async/await programming](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/) and that requires additional effors to make it usable. Having experience with that kind of stuff with [UnityFx.Async](https://github.com/Arvtesh/UnityFx.Async) I decided to make a very minimal set of tools just for this purpose.
@@ -30,8 +81,6 @@ The project was initially created to help author with his [Unity3d](https://unit
 ## Documentation
 Please see the links below for extended information on the product:
 - [Unity forums](https://forum.unity.com/threads/tt).
-- [Documentation](https://arvtesh.github.io/UnityFx.Tasks/articles/intro.html).
-- [API Reference](https://arvtesh.github.io/UnityFx.Tasks/api/index.html).
 - [CHANGELOG](CHANGELOG.md).
 - [SUPPORT](.github/SUPPORT.md).
 
