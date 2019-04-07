@@ -22,7 +22,48 @@ git submodule -q update --init
 The [Unity Asset Store package](https://assetstore.unity.com/packages/tools/tt) can be installed using the editor. One can also download it directly from [Github releases](https://github.com/Arvtesh/UnityFx.Tasks/releases)
 
 ## Using the library
-TODO
+Import the namespace:
+```csharp
+using UnityFx.Tasks;
+```
+The following sample demonstrates loading a scene packed in an asset bundle:
+```csharp
+using System;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityFx.Tasks;
+
+public static async Task<Scene> LoadSceneFromAssetBundle(string url)
+{
+	using (var www = UnityWebRequestAssetBundle.GetAssetBundle(url))
+	{
+		var assetBundle = await www.ConfigureAwait<AssetBundle>();
+
+		try
+		{
+			return await assetBundle.LoadSceneTaskAsync(LoadSceneMode.Single);
+		}
+		finally
+		{
+			assetBundle.Unload(false);
+		}
+	}
+}
+```
+
+Converting a coroutine to a task is easy:
+```csharp
+private IEnumerator SomeCoroutine(TaskCompletionSource<int> completionSource)
+{
+	yield return new WaitForSeconds(1);
+	completionSource.TrySetResult(10);
+}
+
+// Start the coroutine. Note that you do not require a MonoBehaviour instance to do this.
+var task = TaskUtility.FromCoroutine(SomeCoroutine);
+```
+
 
 ## Motivation
 The project was initially created to help author with his [Unity3d](https://unity3d.com) projects. Unity doesn't adapt their APIs to the [async/await programming](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/) and that requires additional effors to make it usable. Having experience with that kind of stuff with [UnityFx.Async](https://github.com/Arvtesh/UnityFx.Async) I decided to make a very minimal set of tools just for this purpose.
