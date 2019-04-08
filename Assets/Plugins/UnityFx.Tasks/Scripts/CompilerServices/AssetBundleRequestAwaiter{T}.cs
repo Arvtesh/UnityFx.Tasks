@@ -31,12 +31,16 @@ namespace UnityFx.Tasks.CompilerServices
 
 		public T GetResult()
 		{
-			if (!_op.asset)
+			if (_op.asset)
 			{
-				throw new UnityAssetLoadException(typeof(T));
+				return (T)_op.asset;
+			}
+			else if (_op.allAssets != null && _op.allAssets.Length > 0)
+			{
+				return (T)_op.allAssets[0];
 			}
 
-			return (T)_op.asset;
+			throw new UnityAssetLoadException(typeof(T));
 		}
 
 		public void OnCompleted(Action continuation)

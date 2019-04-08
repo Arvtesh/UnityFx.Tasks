@@ -31,12 +31,16 @@ namespace UnityFx.Tasks.CompilerServices
 
 		public UnityEngine.Object GetResult()
 		{
-			if (!_op.asset)
+			if (_op.asset)
 			{
-				throw new UnityAssetLoadException();
+				return _op.asset;
+			}
+			else if (_op.allAssets != null && _op.allAssets.Length > 0)
+			{
+				return _op.allAssets[0];
 			}
 
-			return _op.asset;
+			throw new UnityAssetLoadException();
 		}
 
 		public void OnCompleted(Action continuation)
