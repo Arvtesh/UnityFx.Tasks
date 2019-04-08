@@ -50,7 +50,7 @@ public static async Task<Scene> LoadSceneFromAssetBundle(string url)
 {
 	using (var www = UnityWebRequestAssetBundle.GetAssetBundle(url))
 	{
-		var assetBundle = await www.ConfigureAwait<AssetBundle>();
+		var assetBundle = await www.SendWebRequest().ConfigureAwait<AssetBundle>();
 
 		try
 		{

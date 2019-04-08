@@ -160,7 +160,6 @@ namespace UnityFx.Tasks
 		/// Starts a coroutine. Can be called from non-Unity thread.
 		/// </summary>
 		/// <param name="enumerator">The coroutine to run.</param>
-		/// <returns>Returns the coroutine handle.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="enumerator"/> is <see langword="null"/>.</exception>
 		/// <seealso cref="StopCoroutine(Coroutine)"/>
 		/// <seealso cref="StopCoroutine(IEnumerator)"/>
