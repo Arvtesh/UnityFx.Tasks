@@ -40,12 +40,30 @@ namespace UnityFx.Tasks
 		}
 
 		/// <summary>
+		/// Creates a configurable awaitable object for the <see cref="ResourceRequest"/> instance.
+		/// </summary>
+		/// <param name="op">The source operation.</param>
+		public static CompilerServices.ResourceRequestAwaitable<T> ConfigureAwait<T>(this ResourceRequest op) where T : UnityEngine.Object
+		{
+			return new CompilerServices.ResourceRequestAwaitable<T>(op);
+		}
+
+		/// <summary>
 		/// Returns the <see cref="AssetBundleRequest"/> awaiter. This method is intended for compiler use only.
 		/// </summary>
 		/// <param name="op">The operation to await.</param>
 		public static CompilerServices.AssetBundleRequestAwaiter GetAwaiter(this AssetBundleRequest op)
 		{
 			return new CompilerServices.AssetBundleRequestAwaiter(op);
+		}
+
+		/// <summary>
+		/// Creates a configurable awaitable object for the <see cref="AssetBundleRequest"/> instance.
+		/// </summary>
+		/// <param name="op">The source operation.</param>
+		public static CompilerServices.AssetBundleRequestAwaitable<T> ConfigureAwait<T>(this AssetBundleRequest op) where T : UnityEngine.Object
+		{
+			return new CompilerServices.AssetBundleRequestAwaitable<T>(op);
 		}
 
 		/// <summary>
@@ -64,6 +82,15 @@ namespace UnityFx.Tasks
 		public static CompilerServices.UnityWebRequestAwaiter GetAwaiter(this UnityWebRequest op)
 		{
 			return new CompilerServices.UnityWebRequestAwaiter(op);
+		}
+
+		/// <summary>
+		/// Creates a configurable awaitable object for the <see cref="UnityWebRequestAsyncOperation"/> instance.
+		/// </summary>
+		/// <param name="op">The source operation.</param>
+		public static CompilerServices.UnityWebRequestAwaitable<T> ConfigureAwait<T>(this UnityWebRequestAsyncOperation op) where T : class
+		{
+			return new CompilerServices.UnityWebRequestAwaitable<T>(op.webRequest);
 		}
 	}
 }

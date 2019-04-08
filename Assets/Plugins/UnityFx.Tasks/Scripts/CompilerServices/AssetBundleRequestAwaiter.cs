@@ -11,7 +11,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// Provides an awaitable object that allows for configured awaits on <see cref="AssetBundleRequest"/>.
 	/// This type is intended for compiler use only.
 	/// </summary>
-	/// <seealso cref="AsyncOperation"/>
+	/// <seealso cref="AssetBundleRequest"/>
 	public struct AssetBundleRequestAwaiter : INotifyCompletion
 	{
 		private readonly AssetBundleRequest _op;
@@ -33,7 +33,7 @@ namespace UnityFx.Tasks.CompilerServices
 		{
 			if (!_op.asset)
 			{
-				throw new InvalidOperationException();
+				throw new UnityAssetLoadException();
 			}
 
 			return _op.asset;

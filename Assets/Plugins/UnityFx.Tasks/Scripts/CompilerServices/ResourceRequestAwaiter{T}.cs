@@ -12,7 +12,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// This type is intended for compiler use only.
 	/// </summary>
 	/// <seealso cref="ResourceRequest"/>
-	public struct ResourceRequestAwaiter : INotifyCompletion
+	public struct ResourceRequestAwaiter<T> : INotifyCompletion where T : UnityEngine.Object
 	{
 		private readonly ResourceRequest _op;
 
@@ -29,14 +29,14 @@ namespace UnityFx.Tasks.CompilerServices
 			}
 		}
 
-		public UnityEngine.Object GetResult()
+		public T GetResult()
 		{
 			if (!_op.asset)
 			{
-				throw new UnityAssetLoadException();
+				throw new UnityAssetLoadException(typeof(T));
 			}
 
-			return _op.asset;
+			return (T)_op.asset;
 		}
 
 		public void OnCompleted(Action continuation)
