@@ -18,66 +18,6 @@ namespace UnityFx.Tasks
 		#region interface
 
 		/// <summary>
-		/// Creates an <see cref="Task{TResult}"/> wrapper for the specified <see cref="AssetBundleRequest"/>.
-		/// </summary>
-		/// <param name="op">The operation to wrap.</param>
-		public static Task<T> ToTask<T>(this AssetBundleRequest op) where T : UnityEngine.Object
-		{
-			return ToTask<T>(op, CancellationToken.None);
-		}
-
-		/// <summary>
-		/// Creates an <see cref="Task{TResult}"/> wrapper for the specified <see cref="AssetBundleRequest"/>.
-		/// </summary>
-		/// <param name="op">The operation to wrap.</param>
-		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
-		public static Task<T> ToTask<T>(this AssetBundleRequest op, CancellationToken cancellationToken) where T : UnityEngine.Object
-		{
-			if (cancellationToken.IsCancellationRequested)
-			{
-				return Task.FromCanceled<T>(cancellationToken);
-			}
-
-			if (op.isDone)
-			{
-				if (op.asset is T)
-				{
-					return Task.FromResult(op.asset as T);
-				}
-				else
-				{
-					return Task.FromException<T>(new InvalidCastException());
-				}
-			}
-			else
-			{
-				var result = new TaskCompletionSource<T>(op);
-
-				if (cancellationToken.CanBeCanceled)
-				{
-					cancellationToken.Register(() =>
-					{
-						result.TrySetCanceled(cancellationToken);
-					});
-				}
-
-				op.completed += o =>
-				{
-					if (op.asset is T)
-					{
-						result.TrySetResult(op.asset as T);
-					}
-					else
-					{
-						result.TrySetException(new InvalidCastException());
-					}
-				};
-
-				return result.Task;
-			}
-		}
-
-		/// <summary>
 		/// Loads a <see cref="Scene"/> from an asset bundle.
 		/// </summary>
 		/// <param name="assetBundle">The source asset bundle.</param>
