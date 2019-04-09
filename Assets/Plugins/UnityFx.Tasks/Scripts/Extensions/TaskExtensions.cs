@@ -22,6 +22,7 @@ namespace UnityFx.Tasks
 		/// Converts the operation (task) to a <see cref="IEnumerator"/> instance that can be used in Unity coroutine.
 		/// </summary>
 		/// <param name="op">The source operation (task).</param>
+		/// <returns>Returns enumerator that can be used in Unity coroutine.</returns>
 		public static IEnumerator ToEnumerator(this IAsyncResult op)
 		{
 			if (op is IEnumerator)

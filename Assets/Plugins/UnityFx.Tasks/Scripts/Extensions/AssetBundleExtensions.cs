@@ -23,6 +23,8 @@ namespace UnityFx.Tasks
 		/// <param name="assetBundle">The source asset bundle.</param>
 		/// <param name="loadMode">The scene load mode.</param>
 		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
+		/// <returns>Returns the <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="LoadSceneTaskAsync(AssetBundle, LoadSceneMode, string, CancellationToken)"/>
 		public static Task<Scene> LoadSceneTaskAsync(this AssetBundle assetBundle, LoadSceneMode loadMode, string sceneName = null)
 		{
 			return LoadSceneTaskAsync(assetBundle, loadMode, sceneName, CancellationToken.None);
@@ -35,6 +37,8 @@ namespace UnityFx.Tasks
 		/// <param name="loadMode">The scene load mode.</param>
 		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+		/// <returns>Returns the <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="LoadSceneTaskAsync(AssetBundle, LoadSceneMode, string)"/>
 		public static Task<Scene> LoadSceneTaskAsync(this AssetBundle assetBundle, LoadSceneMode loadMode, string sceneName, CancellationToken cancellationToken)
 		{
 			if (!assetBundle.isStreamedSceneAssetBundle)
@@ -65,6 +69,8 @@ namespace UnityFx.Tasks
 		/// </summary>
 		/// <param name="assetBundle">The source asset bundle.</param>
 		/// <param name="name">Name of the asset to load.</param>
+		/// <returns>Returns the <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="LoadAssetTaskAsync{T}(AssetBundle, string, CancellationToken)"/>
 		public static Task<T> LoadAssetTaskAsync<T>(this AssetBundle assetBundle, string name) where T : UnityEngine.Object
 		{
 			return assetBundle.LoadAssetAsync(name, typeof(T)).ToTask<T>();
@@ -76,6 +82,8 @@ namespace UnityFx.Tasks
 		/// <param name="assetBundle">The source asset bundle.</param>
 		/// <param name="name">Name of the asset to load.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+		/// <returns>Returns the <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="LoadAssetTaskAsync{T}(AssetBundle, string)"/>
 		public static Task<T> LoadAssetTaskAsync<T>(this AssetBundle assetBundle, string name, CancellationToken cancellationToken) where T : UnityEngine.Object
 		{
 			return assetBundle.LoadAssetAsync(name, typeof(T)).ToTask<T>(cancellationToken);

@@ -45,7 +45,7 @@ namespace UnityFx.Tasks
 		/// </summary>
 		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
 		/// <param name="loadMode">The scene load mode.</param>
-		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation progress.</returns>
+		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation state.</returns>
 		public static Task<Scene> LoadSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single)
 		{
 			return LoadSceneAsync(sceneName, loadMode);
@@ -57,7 +57,7 @@ namespace UnityFx.Tasks
 		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
 		/// <param name="loadMode">The scene load mode.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
-		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation progress.</returns>
+		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation state.</returns>
 		public static Task<Scene> LoadSceneAsync(string sceneName, LoadSceneMode loadMode, CancellationToken cancellationToken)
 		{
 			if (cancellationToken.IsCancellationRequested)
@@ -109,9 +109,10 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Starts a coroutine and wraps it with <see cref="Task{TResult}"/>.
 		/// </summary>
+		/// <typeparam name="T">Type of the coroutine result value.</typeparam>
 		/// <param name="coroutineFunc">The coroutine delegate.</param>
-		/// <returns>Returns the coroutine handle.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="coroutineFunc"/> is <see langword="null"/>.</exception>
+		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the coroutine state.</returns>
 		/// <seealso cref="FromCoroutine(Func{IAsyncCompletionSource, IEnumerator}, object)"/>
 		public static Task<T> FromCoroutine<T>(Func<TaskCompletionSource<T>, IEnumerator> coroutineFunc)
 		{
@@ -121,10 +122,11 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Starts a coroutine and wraps it with <see cref="Task{TResult}"/>.
 		/// </summary>
+		/// <typeparam name="T">Type of the coroutine result value.</typeparam>
 		/// <param name="coroutineFunc">The coroutine delegate.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
-		/// <returns>Returns the coroutine handle.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="coroutineFunc"/> is <see langword="null"/>.</exception>
+		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the coroutine state.</returns>
 		/// <seealso cref="FromCoroutine(Func{IAsyncCompletionSource, IEnumerator}, object)"/>
 		public static Task<T> FromCoroutine<T>(Func<TaskCompletionSource<T>, IEnumerator> coroutineFunc, CancellationToken cancellationToken)
 		{

@@ -11,6 +11,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// Provides an awaitable object that allows for configured awaits on <see cref="ResourceRequest"/>.
 	/// This type is intended for compiler use only.
 	/// </summary>
+	/// <seealso cref="ResourceRequestAwaiter{T}"/>
 	/// <seealso cref="ResourceRequest"/>
 	public struct ResourceRequestAwaitable<T> where T : UnityEngine.Object
 	{

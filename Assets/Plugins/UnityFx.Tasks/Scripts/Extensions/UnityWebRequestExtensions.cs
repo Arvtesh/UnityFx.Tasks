@@ -20,7 +20,9 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Creates a configurable awaitable object for the <see cref="UnityWebRequest"/> instance.
 		/// </summary>
+		/// <typeparam name="T">Type of the request result value.</typeparam>
 		/// <param name="request">The source web request.</param>
+		/// <returns>Returns an awaitable object that can track the request completion.</returns>
 		public static CompilerServices.UnityWebRequestAwaitable<T> ConfigureAwait<T>(this UnityWebRequest request) where T : class
 		{
 			return new CompilerServices.UnityWebRequestAwaitable<T>(request);
@@ -30,6 +32,8 @@ namespace UnityFx.Tasks
 		/// Creates an <see cref="Task"/> wrapper for the specified <see cref="UnityWebRequest"/>. The method calls <see cref="UnityWebRequest.SendWebRequest"/> (if not called).
 		/// </summary>
 		/// <param name="request">The source web request.</param>
+		/// <returns>Returns a <see cref="Task"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask(UnityWebRequest, CancellationToken)"/>
 		public static Task ToTask(this UnityWebRequest request)
 		{
 			return ToTask(request, CancellationToken.None);
@@ -40,6 +44,8 @@ namespace UnityFx.Tasks
 		/// </summary>
 		/// <param name="request">The source web request.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
+		/// <returns>Returns a <see cref="Task"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask(UnityWebRequest)"/>
 		public static Task ToTask(this UnityWebRequest request, CancellationToken cancellationToken)
 		{
 			if (cancellationToken.IsCancellationRequested)
@@ -92,7 +98,10 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Creates an <see cref="Task{TResult}"/> wrapper for the specified <see cref="UnityWebRequest"/>. The method calls <see cref="UnityWebRequest.SendWebRequest"/> (if not called).
 		/// </summary>
+		/// <typeparam name="T">Type of the request result value.</typeparam>
 		/// <param name="request">The source web request.</param>
+		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask{T}(UnityWebRequest, CancellationToken)"/>
 		public static Task<T> ToTask<T>(this UnityWebRequest request) where T : class
 		{
 			return ToTask<T>(request, CancellationToken.None);
@@ -101,8 +110,11 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Creates a cancellable <see cref="Task{TResult}"/> wrapper for the specified <see cref="UnityWebRequest"/>. The method calls <see cref="UnityWebRequest.SendWebRequest"/> (if not called).
 		/// </summary>
+		/// <typeparam name="T">Type of the request result value.</typeparam>
 		/// <param name="request">The source web request.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
+		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask{T}(UnityWebRequest)"/>
 		public static Task<T> ToTask<T>(this UnityWebRequest request, CancellationToken cancellationToken) where T : class
 		{
 			if (cancellationToken.IsCancellationRequested)

@@ -17,6 +17,8 @@ namespace UnityFx.Tasks
 		/// Creates an <see cref="Task"/> wrapper for the Unity <see cref="AsyncOperation"/>.
 		/// </summary>
 		/// <param name="op">The source operation.</param>
+		/// <returns>Returns a <see cref="Task"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask(AsyncOperation, CancellationToken)"/>
 		public static Task ToTask(this AsyncOperation op)
 		{
 			return ToTask(op, CancellationToken.None);
@@ -27,6 +29,8 @@ namespace UnityFx.Tasks
 		/// </summary>
 		/// <param name="op">The source operation.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
+		/// <returns>Returns a <see cref="Task"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask(AsyncOperation)"/>
 		public static Task ToTask(this AsyncOperation op, CancellationToken cancellationToken)
 		{
 			if (op.isDone)
@@ -59,7 +63,10 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Creates an <see cref="Task{TResult}"/> wrapper for the Unity <see cref="ResourceRequest"/>.
 		/// </summary>
+		/// <typeparam name="T">Type of the operation result value.</typeparam>
 		/// <param name="op">The source operation.</param>
+		/// <returns>Returns a <see cref="Task"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask{T}(ResourceRequest, CancellationToken)"/>
 		public static Task<T> ToTask<T>(this ResourceRequest op) where T : UnityEngine.Object
 		{
 			return ToTask<T>(op, CancellationToken.None);
@@ -68,8 +75,11 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Creates an <see cref="Task{TResult}"/> wrapper for the Unity <see cref="ResourceRequest"/>.
 		/// </summary>
+		/// <typeparam name="T">Type of the operation result value.</typeparam>
 		/// <param name="op">The source operation.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
+		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask{T}(ResourceRequest)"/>
 		public static Task<T> ToTask<T>(this ResourceRequest op, CancellationToken cancellationToken) where T : UnityEngine.Object
 		{
 			if (op.isDone)
@@ -122,7 +132,10 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Creates an <see cref="Task{TResult}"/> wrapper for the Unity <see cref="AssetBundleRequest"/>.
 		/// </summary>
+		/// <typeparam name="T">Type of the operation result value.</typeparam>
 		/// <param name="op">The source operation.</param>
+		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask{T}(AssetBundleRequest, CancellationToken)"/>
 		public static Task<T> ToTask<T>(this AssetBundleRequest op) where T : UnityEngine.Object
 		{
 			return ToTask<T>(op, CancellationToken.None);
@@ -131,8 +144,11 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Creates an <see cref="Task{TResult}"/> wrapper for the Unity <see cref="AssetBundleRequest"/>.
 		/// </summary>
+		/// <typeparam name="T">Type of the operation result value.</typeparam>
 		/// <param name="op">The source operation.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
+		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask{T}(AssetBundleRequest)"/>
 		public static Task<T> ToTask<T>(this AssetBundleRequest op, CancellationToken cancellationToken) where T : UnityEngine.Object
 		{
 			if (op.isDone)
@@ -186,6 +202,8 @@ namespace UnityFx.Tasks
 		/// Creates an <see cref="Task{TResult}"/> wrapper for the Unity <see cref="AssetBundleCreateRequest"/>.
 		/// </summary>
 		/// <param name="op">The source operation.</param>
+		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask(AssetBundleCreateRequest, CancellationToken)"/>
 		public static Task<AssetBundle> ToTask(this AssetBundleCreateRequest op)
 		{
 			return ToTask(op, CancellationToken.None);
@@ -196,6 +214,8 @@ namespace UnityFx.Tasks
 		/// </summary>
 		/// <param name="op">The source operation.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
+		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask(AssetBundleCreateRequest)"/>
 		public static Task<AssetBundle> ToTask(this AssetBundleCreateRequest op, CancellationToken cancellationToken)
 		{
 			if (op.isDone)
