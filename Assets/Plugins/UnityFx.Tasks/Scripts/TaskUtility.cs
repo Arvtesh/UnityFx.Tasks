@@ -132,7 +132,7 @@ namespace UnityFx.Tasks
 		{
 			if (coroutineFunc == null)
 			{
-				throw new ArgumentNullException("coroutineFunc");
+				throw new ArgumentNullException(nameof(coroutineFunc));
 			}
 
 			if (cancellationToken.IsCancellationRequested)

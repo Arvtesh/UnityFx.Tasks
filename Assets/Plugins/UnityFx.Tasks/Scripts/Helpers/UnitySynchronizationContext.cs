@@ -69,7 +69,7 @@ namespace UnityFx.Tasks.Helpers
 		{
 			if (d == null)
 			{
-				throw new ArgumentNullException("d");
+				throw new ArgumentNullException(nameof(d));
 			}
 
 			if (this == Current)
@@ -118,7 +118,7 @@ namespace UnityFx.Tasks.Helpers
 		{
 			if (d == null)
 			{
-				throw new ArgumentNullException("d");
+				throw new ArgumentNullException(nameof(d));
 			}
 
 			_actionQueue.Enqueue(new InvokeResult(d, state));
