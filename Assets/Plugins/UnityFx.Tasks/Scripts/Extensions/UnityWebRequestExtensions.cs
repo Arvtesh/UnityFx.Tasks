@@ -170,15 +170,6 @@ namespace UnityFx.Tasks
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void ThrowIfNonModifiable(this UnityWebRequest request)
-		{
-			if (!request.isModifiable)
-			{
-				throw new InvalidOperationException("SendWebRequest() has already been called on the web request.");
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void ThrowIfFailed(this UnityWebRequest request)
 		{
 			if (request.isHttpError || request.isNetworkError)
@@ -224,7 +215,8 @@ namespace UnityFx.Tasks
 		{
 			try
 			{
-				tcs.TrySetResult(GetResult<T>(request));
+				var requestResult = GetResult<T>(request);
+				tcs.TrySetResult(requestResult);
 			}
 			catch (Exception e)
 			{

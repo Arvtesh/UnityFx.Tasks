@@ -70,10 +70,7 @@ namespace UnityFx.Tasks
 
 			if (cancellationToken.CanBeCanceled)
 			{
-				cancellationToken.Register(() =>
-				{
-					result.TrySetCanceled(cancellationToken);
-				});
+				cancellationToken.Register(() => result.TrySetCanceled(cancellationToken));
 			}
 
 			op.completed += o =>
@@ -94,7 +91,11 @@ namespace UnityFx.Tasks
 
 				if (scene.isLoaded)
 				{
-					result.TrySetResult(scene);
+					// NOTE: TrySetResult() failure probably means that the operation was cancelled, thus the scene should be unloaded.
+					if (!result.TrySetResult(scene))
+					{
+						SceneManager.UnloadSceneAsync(scene);
+					}
 				}
 				else
 				{

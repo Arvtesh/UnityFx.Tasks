@@ -99,9 +99,15 @@ namespace UnityFx.Tasks
 
 				op.completed += o =>
 				{
-					if (op.asset is T)
+					var asset = op.asset as T;
+
+					if (asset)
 					{
-						result.TrySetResult(op.asset as T);
+						// NOTE: TrySetResult() failure means that the operation was cancelled, thus the resource should be unloaded.
+						if (!result.TrySetResult(asset))
+						{
+							Resources.UnloadAsset(asset);
+						}
 					}
 					else
 					{
@@ -156,9 +162,15 @@ namespace UnityFx.Tasks
 
 				op.completed += o =>
 				{
-					if (op.asset is T)
+					var asset = op.asset as T;
+
+					if (asset)
 					{
-						result.TrySetResult(op.asset as T);
+						// NOTE: TrySetResult() failure means that the operation was cancelled, thus the asset should be unloaded.
+						if (!result.TrySetResult(asset))
+						{
+							UnityEngine.Object.Destroy(asset);
+						}
 					}
 					else
 					{
@@ -219,6 +231,7 @@ namespace UnityFx.Tasks
 					}
 					else if (!result.TrySetResult(op.assetBundle))
 					{
+						// NOTE: TrySetResult() failure means that the operation was cancelled, thus the asset bundle should be unloaded.
 						op.assetBundle.Unload(true);
 					}
 				};
