@@ -149,13 +149,15 @@ namespace UnityFx.Tasks
 		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
 		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
 		/// <seealso cref="ToTask{T}(AssetBundleRequest)"/>
-		public static Task<T> ToTask<T>(this AssetBundleRequest op, CancellationToken cancellationToken) where T : UnityEngine.Object
+		public static Task<T> ToTask<T>(this AssetBundleRequest op, CancellationToken cancellationToken) where T : class
 		{
 			if (op.isDone)
 			{
-				if (op.asset is T)
+				var result = GetResult<T>(op);
+
+				if (result != null)
 				{
-					return Task.FromResult(op.asset as T);
+					return Task.FromResult(result);
 				}
 				else
 				{
@@ -169,32 +171,43 @@ namespace UnityFx.Tasks
 					return Task.FromCanceled<T>(cancellationToken);
 				}
 
-				var result = new TaskCompletionSource<T>(op);
+				var tcs = new TaskCompletionSource<T>(op);
 
 				if (cancellationToken.CanBeCanceled)
 				{
-					cancellationToken.Register(() => result.TrySetCanceled(cancellationToken));
+					cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken));
 				}
 
 				op.completed += o =>
 				{
-					var asset = op.asset as T;
+					var result = GetResult<T>(op);
 
-					if (asset)
+					if (result != null)
 					{
-						// NOTE: TrySetResult() failure means that the operation was cancelled, thus the asset should be unloaded.
-						if (!result.TrySetResult(asset))
+						// NOTE: TrySetResult() failure means that the operation was cancelled, thus all assets should be unloaded.
+						if (!tcs.TrySetResult(result))
 						{
-							UnityEngine.Object.Destroy(asset);
+							if (op.allAssets != null)
+							{
+								foreach (var obj in op.allAssets)
+								{
+									UnityEngine.Object.Destroy(obj);
+								}
+							}
+
+							if (op.asset != null)
+							{
+								UnityEngine.Object.Destroy(op.asset);
+							}
 						}
 					}
 					else
 					{
-						result.TrySetException(new UnityAssetLoadException(typeof(T)));
+						tcs.TrySetException(new UnityAssetLoadException(typeof(T)));
 					}
 				};
 
-				return result.Task;
+				return tcs.Task;
 			}
 		}
 
@@ -258,6 +271,33 @@ namespace UnityFx.Tasks
 
 				return result.Task;
 			}
+		}
+
+		internal static T GetResult<T>(AssetBundleRequest op) where T : class
+		{
+			if (typeof(T).IsArray)
+			{
+				var assets = op.allAssets;
+
+				// NOTE: Cannot just cast op.allAssets to T (this would return null), have to create new array.
+				if (assets != null && assets.Length >= 0)
+				{
+					var elementType = typeof(T).GetElementType();
+					var result = Array.CreateInstance(elementType, assets.Length);
+					assets.CopyTo(result, 0);
+					return result as T;
+				}
+			}
+			else if (op.asset != null)
+			{
+				return op.asset as T;
+			}
+			else if (op.allAssets != null && op.allAssets.Length > 0)
+			{
+				return op.allAssets[0] as T;
+			}
+
+			return default(T);
 		}
 	}
 }

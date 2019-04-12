@@ -67,18 +67,20 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Loads an asset from an <see cref="AssetBundle"/>.
 		/// </summary>
+		/// <typeparam name="T">Type of the asset to load.</typeparam>
 		/// <param name="assetBundle">The source asset bundle.</param>
 		/// <param name="name">Name of the asset to load.</param>
 		/// <returns>Returns the <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
 		/// <seealso cref="LoadAssetTaskAsync{T}(AssetBundle, string, CancellationToken)"/>
 		public static Task<T> LoadAssetTaskAsync<T>(this AssetBundle assetBundle, string name) where T : UnityEngine.Object
 		{
-			return assetBundle.LoadAssetAsync(name, typeof(T)).ToTask<T>();
+			return LoadAssetTaskAsync<T>(assetBundle, name, CancellationToken.None);
 		}
 
 		/// <summary>
 		/// Loads an asset from an <see cref="AssetBundle"/>.
 		/// </summary>
+		/// <typeparam name="T">Type of the asset to load.</typeparam>
 		/// <param name="assetBundle">The source asset bundle.</param>
 		/// <param name="name">Name of the asset to load.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
@@ -89,33 +91,34 @@ namespace UnityFx.Tasks
 			return assetBundle.LoadAssetAsync(name, typeof(T)).ToTask<T>(cancellationToken);
 		}
 
+		/// <summary>
+		/// Loads all assets of the specified type from an <see cref="AssetBundle"/>.
+		/// </summary>
+		/// <typeparam name="T">Type of the assets to load.</typeparam>
+		/// <param name="assetBundle">The source asset bundle.</param>
+		/// <returns>Returns the <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="LoadAllAssetsTaskAsync{T}(AssetBundle, CancellationToken)"/>
+		public static Task<T[]> LoadAllAssetsTaskAsync<T>(this AssetBundle assetBundle) where T : UnityEngine.Object
+		{
+			return LoadAllAssetsTaskAsync<T>(assetBundle, CancellationToken.None);
+		}
+
+		/// <summary>
+		/// Loads all assets of the specified type from an <see cref="AssetBundle"/>.
+		/// </summary>
+		/// <typeparam name="T">Type of the assets to load.</typeparam>
+		/// <param name="assetBundle">The source asset bundle.</param>
+		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+		/// <returns>Returns the <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="LoadAllAssetsTaskAsync{T}(AssetBundle)"/>
+		public static Task<T[]> LoadAllAssetsTaskAsync<T>(this AssetBundle assetBundle, CancellationToken cancellationToken) where T : UnityEngine.Object
+		{
+			return assetBundle.LoadAllAssetsAsync(typeof(T)).ToTask<T[]>(cancellationToken);
+		}
+
 		#endregion
 
 		#region implementation
-
-		private static void OnCancelledOperationCompleted(AsyncOperation op)
-		{
-			if (op is AssetBundleRequest)
-			{
-				DestroyAssets(op as AssetBundleRequest);
-			}
-		}
-
-		private static void DestroyAssets(AssetBundleRequest op)
-		{
-			if (op.allAssets != null)
-			{
-				foreach (var asset in op.allAssets)
-				{
-					UnityEngine.Object.Destroy(asset);
-				}
-			}
-			else if (op.asset)
-			{
-				UnityEngine.Object.Destroy(op.asset);
-			}
-		}
-
 		#endregion
 	}
 }
