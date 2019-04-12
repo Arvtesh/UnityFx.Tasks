@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 namespace UnityFx.Tasks
 {
 	/// <summary>
-	/// Async/asait extensions.
+	/// Async/await extensions.
 	/// </summary>
 	public static class AwaitExtensions
 	{
