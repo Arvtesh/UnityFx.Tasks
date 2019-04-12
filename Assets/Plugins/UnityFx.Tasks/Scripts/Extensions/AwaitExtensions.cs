@@ -95,6 +95,17 @@ namespace UnityFx.Tasks
 		}
 
 		/// <summary>
+		/// Creates a configurable awaitable object for the <see cref="UnityWebRequest"/> instance.
+		/// </summary>
+		/// <typeparam name="T">Type of the request result value.</typeparam>
+		/// <param name="request">The source web request.</param>
+		/// <returns>Returns an awaitable object that can track the request completion.</returns>
+		public static CompilerServices.UnityWebRequestAwaitable<T> ConfigureAwait<T>(this UnityWebRequest request) where T : class
+		{
+			return new CompilerServices.UnityWebRequestAwaitable<T>(request);
+		}
+
+		/// <summary>
 		/// Creates a configurable awaitable object for the <see cref="UnityWebRequestAsyncOperation"/> instance.
 		/// </summary>
 		/// <typeparam name="T">Type of the operation result value.</typeparam>
