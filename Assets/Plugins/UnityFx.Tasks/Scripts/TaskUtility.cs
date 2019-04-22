@@ -41,6 +41,14 @@ namespace UnityFx.Tasks
 		}
 
 		/// <summary>
+		/// Awaits Unity thread.
+		/// </summary>
+		public static CompilerServices.UnityThreadAwaitable GetUnityThreadAwaitable()
+		{
+			return new CompilerServices.UnityThreadAwaitable(_mainThreadContext);
+		}
+
+		/// <summary>
 		/// Asynchronously loads a scene with the specified name.
 		/// </summary>
 		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
