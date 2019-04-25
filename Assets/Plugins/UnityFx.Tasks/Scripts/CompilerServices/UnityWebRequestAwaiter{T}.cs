@@ -19,7 +19,7 @@ namespace UnityFx.Tasks.CompilerServices
 
 		public UnityWebRequestAwaiter(UnityWebRequest op)
 		{
-			_request = op;
+			_request = op.ValidateResultType<T>();
 		}
 
 		public bool IsCompleted

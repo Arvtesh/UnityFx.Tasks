@@ -153,6 +153,36 @@ namespace UnityFx.Tasks
 			}
 		}
 
+		internal static UnityWebRequest ValidateResultType<T>(this UnityWebRequest request) where T : class
+		{
+			if (request.downloadHandler == null)
+			{
+				throw new InvalidOperationException("Result type is only available for download requests.");
+			}
+
+			if (request.downloadHandler is DownloadHandlerAssetBundle && typeof(T) != typeof(AssetBundle))
+			{
+				throw new InvalidOperationException($"{nameof(AssetBundle)} result expected, while {typeof(T).Name} supplied.");
+			}
+
+			if (request.downloadHandler is DownloadHandlerTexture && typeof(T) != typeof(Texture) && typeof(T) != typeof(Texture2D))
+			{
+				throw new InvalidOperationException($"{nameof(Texture2D)} result expected, while {typeof(T).Name} supplied.");
+			}
+
+			if (request.downloadHandler is DownloadHandlerAudioClip && typeof(T) != typeof(AudioClip))
+			{
+				throw new InvalidOperationException($"{nameof(AudioClip)} result expected, while {typeof(T).Name} supplied.");
+			}
+
+			if (request.downloadHandler is DownloadHandlerBuffer && typeof(T) != typeof(string) && typeof(T) != typeof(byte[]))
+			{
+				throw new InvalidOperationException($"{nameof(String)} or byte array result expected, while {typeof(T).Name} supplied.");
+			}
+
+			return request;
+		}
+
 		internal static T GetResult<T>(this UnityWebRequest request) where T : class
 		{
 			ThrowIfNotCompleted(request);

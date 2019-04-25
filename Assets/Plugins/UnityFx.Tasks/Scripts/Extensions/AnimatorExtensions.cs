@@ -23,7 +23,7 @@ namespace UnityFx.Tasks
 		/// <param name="stateName">Name of the state to play.</param>
 		/// <param name="layer">The layer index. If layer is -1, it plays the first state with the given state name.</param>
 		/// <returns>An awaitable opject.</returns>
-		public static CompilerServices.AnimatorWhileAwaitable ConfigureAwaitWhile(this Animator animator, string stateName, int layer = -1)
+		public static CompilerServices.AnimatorWhileAwaitable ConfigureAwait(this Animator animator, string stateName, int layer = -1)
 		{
 			return new CompilerServices.AnimatorWhileAwaitable(animator, Animator.StringToHash(stateName), layer);
 		}
@@ -35,7 +35,7 @@ namespace UnityFx.Tasks
 		/// <param name="stateNameHash">Hash of the state name.</param>
 		/// <param name="layer">The layer index. If layer is -1, it plays the first state with the given state name.</param>
 		/// <returns>An awaitable opject.</returns>
-		public static CompilerServices.AnimatorWhileAwaitable ConfigureAwaitWhile(this Animator animator, int stateNameHash, int layer = -1)
+		public static CompilerServices.AnimatorWhileAwaitable ConfigureAwait(this Animator animator, int stateNameHash, int layer = -1)
 		{
 			return new CompilerServices.AnimatorWhileAwaitable(animator, stateNameHash, layer);
 		}

@@ -5,7 +5,7 @@ LICENSE
 https://github.com/Arvtesh/UnityFx.Tasks/blob/master/LICENSE.md
 
 DOCUMENTATION
-https://github.com/Arvtesh/UnityFx.Tasks
+https://github.com/Arvtesh/UnityFx.Tasks/blob/master/README.md
 
 SUPPORT
 mailto:arvtesh@gmail.com

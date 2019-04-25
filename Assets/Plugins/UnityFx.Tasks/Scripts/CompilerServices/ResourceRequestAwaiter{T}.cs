@@ -12,7 +12,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// This type is intended for compiler use only.
 	/// </summary>
 	/// <seealso cref="ResourceRequest"/>
-	public struct ResourceRequestAwaiter<T> : INotifyCompletion where T : UnityEngine.Object
+	public struct ResourceRequestAwaiter<T> : INotifyCompletion where T : class
 	{
 		private readonly ResourceRequest _op;
 
@@ -36,7 +36,12 @@ namespace UnityFx.Tasks.CompilerServices
 				throw new UnityAssetLoadException(typeof(T));
 			}
 
-			return (T)_op.asset;
+			if (_op.asset is TextAsset && typeof(T) == typeof(string))
+			{
+				return (_op.asset as TextAsset).text as T;
+			}
+
+			return _op.asset as T;
 		}
 
 		public void OnCompleted(Action continuation)

@@ -48,7 +48,7 @@ namespace UnityFx.Tasks
 		/// <typeparam name="T">Type of the operation result value.</typeparam>
 		/// <param name="op">The source operation.</param>
 		/// <returns>Returns an awaitable object that can track the operation completion.</returns>
-		public static CompilerServices.ResourceRequestAwaitable<T> ConfigureAwait<T>(this ResourceRequest op) where T : UnityEngine.Object
+		public static CompilerServices.ResourceRequestAwaitable<T> ConfigureAwait<T>(this ResourceRequest op) where T : class
 		{
 			return new CompilerServices.ResourceRequestAwaitable<T>(op);
 		}

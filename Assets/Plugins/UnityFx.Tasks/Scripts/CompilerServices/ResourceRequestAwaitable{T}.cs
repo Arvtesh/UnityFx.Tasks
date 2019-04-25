@@ -13,7 +13,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// </summary>
 	/// <seealso cref="ResourceRequestAwaiter{T}"/>
 	/// <seealso cref="ResourceRequest"/>
-	public struct ResourceRequestAwaitable<T> where T : UnityEngine.Object
+	public struct ResourceRequestAwaitable<T> where T : class
 	{
 		private readonly ResourceRequestAwaiter<T> _awaiter;
 
