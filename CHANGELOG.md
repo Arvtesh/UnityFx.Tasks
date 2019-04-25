@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/); this proj
 ### Fixed
 - Fixed existing `ToTask` extension methods to unload loaded assets if the operation was cancelled.
 - Fixed several issues in `TaskUtility.LoadSceneAsync` implementation.
+- Fixed default layer value for `Animator` extension methods.
 
 ### Removed
 - Removed default `SynchronizationContext` implementation (Unity 2017.2 already has one).
