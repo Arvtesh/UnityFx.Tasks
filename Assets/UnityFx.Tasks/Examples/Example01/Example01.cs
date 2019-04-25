@@ -19,16 +19,16 @@ namespace UnityFx.Tasks.Examples
 		{
 			try
 			{
-				// await new WaitForSeconds()
+				// Any YieldInstruction can be awaited, including WaitForSeconds, WaitUntil etc.
 				Debug.Log("Time: " + Time.realtimeSinceStartup);
 				await new WaitForSeconds(1);
 				Debug.Log("Time after new WaitForSeconds(1): " + Time.realtimeSinceStartup);
 
-				// await StartCoroutine()
+				// Coroutines can be awaited as well.
 				await StartCoroutine(TestCoroutine());
 				Debug.Log("After await TestCoroutine");
 
-				// await TaskUtility.YieldToUnityThread()
+				// One can easily switch context to Unity thread using 'await TaskUtility.YieldToUnityThread()'.
 				await Task.Run(async () =>
 				{
 					Debug.Log("IsUnityThread: " + TaskUtility.IsUnityThread);
@@ -36,15 +36,15 @@ namespace UnityFx.Tasks.Examples
 					Debug.Log("IsUnityThread after YieldToUnityThread: " + TaskUtility.IsUnityThread);
 				});
 
-				// await Resources.LoadAsync
+				// Any AsyncOperation can be awaited.
 				var textAsset = (TextAsset)await Resources.LoadAsync("Test", typeof(TextAsset));
 				Debug.Log(textAsset.text);
 
-				// await TaskUtility.LoadAssetAsync
+				// There are a number of helper methods in TaskUtility. For example this one loads an asset from resources.
 				var textAsset2 = await TaskUtility.LoadAssetAsync<TextAsset>("Test");
 				Debug.Log(textAsset2.text);
 
-				// await LoadSceneAsync
+				// Another useful helper is for loading scenes.
 				var scene = await TaskUtility.LoadSceneAsync("TestScene", UnityEngine.SceneManagement.LoadSceneMode.Additive);
 				Debug.Log("TestScene.isLoaded: " + scene.isLoaded);
 			}
