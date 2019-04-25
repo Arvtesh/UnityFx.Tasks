@@ -38,11 +38,15 @@ namespace UnityFx.Tasks.Examples
 
 				// Any AsyncOperation can be awaited.
 				var textAsset = (TextAsset)await Resources.LoadAsync("Test", typeof(TextAsset));
-				Debug.Log(textAsset.text);
+				Debug.Log(textAsset);
+
+				// Any AsyncOperation can be converted to Task using ToTask extension method.
+				var obj = await Resources.LoadAsync("Test").ToTask();
+				Debug.Log(obj);
 
 				// There are a number of helper methods in TaskUtility. For example this one loads an asset from resources.
 				var textAsset2 = await TaskUtility.LoadAssetAsync<TextAsset>("Test");
-				Debug.Log(textAsset2.text);
+				Debug.Log(textAsset2);
 
 				// Another useful helper is for loading scenes.
 				var scene = await TaskUtility.LoadSceneAsync("TestScene", UnityEngine.SceneManagement.LoadSceneMode.Additive);
