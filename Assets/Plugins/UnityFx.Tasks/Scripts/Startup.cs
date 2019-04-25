@@ -24,13 +24,7 @@ namespace UnityFx.Tasks
 		private static void Initialize()
 		{
 			var context = SynchronizationContext.Current;
-
-			if (context == null)
-			{
-				// Create custom SynchronizationContext for the main thread.
-				context = new Helpers.UnitySynchronizationContext();
-				SynchronizationContext.SetSynchronizationContext(context);
-			}
+			Debug.Assert(context != null, "SynchronizationContext is expected to set by Unity.");
 
 			// Create helper GameObject
 			var go = new GameObject("UnityFx.Tasks")

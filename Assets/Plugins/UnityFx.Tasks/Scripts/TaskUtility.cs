@@ -277,7 +277,6 @@ namespace UnityFx.Tasks
 		{
 			private Dictionary<UnityWebRequest, Action> _ops;
 			private List<KeyValuePair<UnityWebRequest, Action>> _opsToRemove;
-			private Helpers.UnitySynchronizationContext _context;
 
 			public void AddCompletionCallback(UnityWebRequest op, Action cb)
 			{
@@ -288,11 +287,6 @@ namespace UnityFx.Tasks
 				}
 
 				_ops.Add(op, cb);
-			}
-
-			private void Awake()
-			{
-				_context = _mainThreadContext as Helpers.UnitySynchronizationContext;
 			}
 
 			private void Update()
@@ -323,8 +317,6 @@ namespace UnityFx.Tasks
 
 					_opsToRemove.Clear();
 				}
-
-				_context?.Update(this);
 			}
 		}
 
