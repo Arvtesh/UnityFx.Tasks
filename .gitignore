@@ -7,9 +7,7 @@
 [Bb]uild/
 [Bb]uilds/
 [Pp]ackages/
-[Pp]roject[Ss]ettings/
 [Uu]nity[Pp]ackage[Mm]anager/
-[Aa]ssets/[Aa]sset[Ss]tore[Tt]ools/
 
 # Visual Studio cache directory
 .vs/
@@ -29,7 +27,6 @@ _site/
 *.pdb
 *.sln
 *.csproj
-*.meta
 
 # Unity3D generated meta files
 *.pidb.meta
