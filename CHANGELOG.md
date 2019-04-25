@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/); this proj
 - Added `ToTask` conversions to `AsyncOperation`.
 - Added support for loading arrays of objects from asset bundles via `LoadAllAssetsTaskAsync` extension methds.
 - Added `TaskUtility.YieldToUnityThread` method that can yield execution to Unity thread.
+- Added `TaskUtility.LoadAssetAsync` helpers.
 - Added examples.
 
 ### Fixed
