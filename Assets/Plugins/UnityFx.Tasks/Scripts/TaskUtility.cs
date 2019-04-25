@@ -51,69 +51,87 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Asynchronously loads a scene with the specified name.
 		/// </summary>
-		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
+		/// <param name="sceneName">Name of the scene to load.</param>
 		/// <param name="loadMode">The scene load mode.</param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="sceneName"/> is <see langword="null"/>.</exception>
+		/// <exception cref="InvalidOperationException">Thrown if the scene hasn't been added to the build settings or the source AssetBundle hasn't been loaded.</exception>
 		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation state.</returns>
 		/// <seealso cref="LoadSceneAsync(string, LoadSceneMode, CancellationToken)"/>
 		public static Task<Scene> LoadSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single)
 		{
-			return LoadSceneAsync(sceneName, loadMode);
+			return LoadSceneAsync(sceneName, loadMode, CancellationToken.None);
 		}
 
 		/// <summary>
 		/// Asynchronously loads a scene with the specified name.
 		/// </summary>
-		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
+		/// <param name="sceneName">Name of the scene to load.</param>
 		/// <param name="loadMode">The scene load mode.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="sceneName"/> is <see langword="null"/>.</exception>
+		/// <exception cref="InvalidOperationException">Thrown if the scene hasn't been added to the build settings or the source AssetBundle hasn't been loaded.</exception>
 		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation state.</returns>
 		/// <seealso cref="LoadSceneAsync(string, LoadSceneMode)"/>
 		public static Task<Scene> LoadSceneAsync(string sceneName, LoadSceneMode loadMode, CancellationToken cancellationToken)
 		{
+			if (sceneName == null)
+			{
+				throw new ArgumentNullException(nameof(sceneName));
+			}
+
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return Task.FromCanceled<Scene>(cancellationToken);
 			}
 
 			var op = SceneManager.LoadSceneAsync(sceneName, loadMode);
-			var result = new TaskCompletionSource<Scene>(op);
 
-			if (cancellationToken.CanBeCanceled)
+			// NOTE: If the scene cannot be loaded, result of the LoadSceneAsync is null.
+			if (op != null)
 			{
-				cancellationToken.Register(() => result.TrySetCanceled(cancellationToken));
+				var result = new TaskCompletionSource<Scene>(op);
+
+				if (cancellationToken.CanBeCanceled)
+				{
+					cancellationToken.Register(() => result.TrySetCanceled(cancellationToken));
+				}
+
+				op.completed += o =>
+				{
+					var scene = default(Scene);
+
+					// NOTE: Grab the last scene with the specified name from the list of loaded scenes.
+					for (var i = SceneManager.sceneCount - 1; i >= 0; --i)
+					{
+						var s = SceneManager.GetSceneAt(i);
+
+						if (s.name == sceneName)
+						{
+							scene = s;
+							break;
+						}
+					}
+
+					if (scene.isLoaded)
+					{
+						// NOTE: TrySetResult() failure probably means that the operation was cancelled, thus the scene should be unloaded.
+						if (!result.TrySetResult(scene))
+						{
+							SceneManager.UnloadSceneAsync(scene);
+						}
+					}
+					else
+					{
+						result.TrySetException(new UnityAssetLoadException(sceneName, typeof(Scene)));
+					}
+				};
+
+				return result.Task;
 			}
-
-			op.completed += o =>
+			else
 			{
-				var scene = default(Scene);
-
-				// NOTE: Grab the last scene with the specified name from the list of loaded scenes.
-				for (var i = SceneManager.sceneCount - 1; i >= 0; --i)
-				{
-					var s = SceneManager.GetSceneAt(i);
-
-					if (s.name == sceneName)
-					{
-						scene = s;
-						break;
-					}
-				}
-
-				if (scene.isLoaded)
-				{
-					// NOTE: TrySetResult() failure probably means that the operation was cancelled, thus the scene should be unloaded.
-					if (!result.TrySetResult(scene))
-					{
-						SceneManager.UnloadSceneAsync(scene);
-					}
-				}
-				else
-				{
-					result.TrySetException(new UnityAssetLoadException(sceneName, typeof(Scene)));
-				}
-			};
-
-			return result.Task;
+				return Task.FromException<Scene>(new InvalidOperationException($"Cannot load scene '{sceneName}'. Please make sure it has been added to the build settings or the {nameof(AssetBundle)} has been loaded successfully."));
+			}
 		}
 
 		/// <summary>
@@ -122,6 +140,7 @@ namespace UnityFx.Tasks
 		/// <typeparam name="T">Type of the coroutine result value.</typeparam>
 		/// <param name="coroutineFunc">The coroutine delegate.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="coroutineFunc"/> is <see langword="null"/>.</exception>
+		/// <exception cref="InvalidOperationException">Thrown if the scene hasn't been added to the build settings or the asset bundle hasn't been loaded.</exception>
 		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the coroutine state.</returns>
 		/// <seealso cref="FromCoroutine(Func{IAsyncCompletionSource, IEnumerator}, object)"/>
 		public static Task<T> FromCoroutine<T>(Func<TaskCompletionSource<T>, IEnumerator> coroutineFunc)
@@ -136,6 +155,7 @@ namespace UnityFx.Tasks
 		/// <param name="coroutineFunc">The coroutine delegate.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="coroutineFunc"/> is <see langword="null"/>.</exception>
+		/// <exception cref="InvalidOperationException">Thrown if the scene hasn't been added to the build settings or the asset bundle hasn't been loaded.</exception>
 		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the coroutine state.</returns>
 		/// <seealso cref="FromCoroutine(Func{IAsyncCompletionSource, IEnumerator}, object)"/>
 		public static Task<T> FromCoroutine<T>(Func<TaskCompletionSource<T>, IEnumerator> coroutineFunc, CancellationToken cancellationToken)
