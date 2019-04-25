@@ -43,7 +43,7 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Awaits Unity thread.
 		/// </summary>
-		public static CompilerServices.UnityThreadAwaitable GetUnityThreadAwaitable()
+		public static CompilerServices.UnityThreadAwaitable YieldToUnityThread()
 		{
 			return new CompilerServices.UnityThreadAwaitable(_mainThreadContext);
 		}
@@ -54,6 +54,7 @@ namespace UnityFx.Tasks
 		/// <param name="sceneName">Name of the scene to load or <see langword="null"/> to load the any scene.</param>
 		/// <param name="loadMode">The scene load mode.</param>
 		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation state.</returns>
+		/// <seealso cref="LoadSceneAsync(string, LoadSceneMode, CancellationToken)"/>
 		public static Task<Scene> LoadSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single)
 		{
 			return LoadSceneAsync(sceneName, loadMode);
@@ -66,6 +67,7 @@ namespace UnityFx.Tasks
 		/// <param name="loadMode">The scene load mode.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
 		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation state.</returns>
+		/// <seealso cref="LoadSceneAsync(string, LoadSceneMode)"/>
 		public static Task<Scene> LoadSceneAsync(string sceneName, LoadSceneMode loadMode, CancellationToken cancellationToken)
 		{
 			if (cancellationToken.IsCancellationRequested)
