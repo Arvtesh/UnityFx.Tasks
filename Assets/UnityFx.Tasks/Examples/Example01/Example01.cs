@@ -36,8 +36,13 @@ namespace UnityFx.Tasks.Examples
 					Debug.Log("IsUnityThread after YieldToUnityThread: " + TaskUtility.IsUnityThread);
 				});
 
-				var text = await Resources.LoadAsync("Test", typeof(TextAsset)).ConfigureAwait<string>();
-				Debug.Log(text);
+				// await Resources.LoadAsync
+				var textAsset = (TextAsset)await Resources.LoadAsync("Test", typeof(TextAsset));
+				Debug.Log(textAsset.text);
+
+				// await TaskUtility.LoadAssetAsync
+				var textAsset2 = await TaskUtility.LoadAssetAsync<TextAsset>("Test");
+				Debug.Log(textAsset2.text);
 
 				// await LoadSceneAsync
 				var scene = await TaskUtility.LoadSceneAsync("TestScene", UnityEngine.SceneManagement.LoadSceneMode.Additive);

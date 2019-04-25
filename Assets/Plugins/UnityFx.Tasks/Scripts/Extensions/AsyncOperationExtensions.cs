@@ -63,6 +63,29 @@ namespace UnityFx.Tasks
 		/// <summary>
 		/// Creates an <see cref="Task{TResult}"/> wrapper for the Unity <see cref="ResourceRequest"/>.
 		/// </summary>
+		/// <param name="op">The source operation.</param>
+		/// <returns>Returns a <see cref="Task"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask{T}(ResourceRequest)"/>
+		public static Task<UnityEngine.Object> ToTask(this ResourceRequest op)
+		{
+			return ToTask<UnityEngine.Object>(op, CancellationToken.None);
+		}
+
+		/// <summary>
+		/// Creates an <see cref="Task{TResult}"/> wrapper for the Unity <see cref="ResourceRequest"/>.
+		/// </summary>
+		/// <param name="op">The source operation.</param>
+		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
+		/// <returns>Returns a <see cref="Task"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask{T}(ResourceRequest, CancellationToken)"/>
+		public static Task<UnityEngine.Object> ToTask(this ResourceRequest op, CancellationToken cancellationToken)
+		{
+			return ToTask<UnityEngine.Object>(op, cancellationToken);
+		}
+
+		/// <summary>
+		/// Creates an <see cref="Task{TResult}"/> wrapper for the Unity <see cref="ResourceRequest"/>.
+		/// </summary>
 		/// <typeparam name="T">Type of the operation result value.</typeparam>
 		/// <param name="op">The source operation.</param>
 		/// <returns>Returns a <see cref="Task"/> instance that can be used to track the operation state.</returns>
