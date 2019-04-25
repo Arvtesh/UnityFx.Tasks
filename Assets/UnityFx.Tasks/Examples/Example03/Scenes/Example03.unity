@@ -217,7 +217,6 @@ GameObject:
   - component: {fileID: 206580028}
   - component: {fileID: 206580027}
   - component: {fileID: 206580026}
-  - component: {fileID: 206580029}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -270,23 +269,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &206580029
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 206580025}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: a55a4173b1bc46243b213e03383a03b8, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
 --- !u!1 &595039108
 GameObject:
   m_ObjectHideFlags: 0
