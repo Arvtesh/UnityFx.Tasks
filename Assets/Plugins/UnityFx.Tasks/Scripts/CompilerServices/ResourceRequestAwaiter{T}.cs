@@ -12,7 +12,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// This type is intended for compiler use only.
 	/// </summary>
 	/// <seealso cref="ResourceRequest"/>
-	public struct ResourceRequestAwaiter<T> : INotifyCompletion where T : UnityEngine.Object
+	public struct ResourceRequestAwaiter<T> : ICriticalNotifyCompletion where T : UnityEngine.Object
 	{
 		private readonly ResourceRequest _op;
 
@@ -40,6 +40,11 @@ namespace UnityFx.Tasks.CompilerServices
 		}
 
 		public void OnCompleted(Action continuation)
+		{
+			_op.completed += op => continuation();
+		}
+
+		public void UnsafeOnCompleted(Action continuation)
 		{
 			_op.completed += op => continuation();
 		}

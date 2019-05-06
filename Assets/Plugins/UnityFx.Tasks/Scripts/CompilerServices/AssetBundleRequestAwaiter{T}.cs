@@ -12,7 +12,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// This type is intended for compiler use only.
 	/// </summary>
 	/// <seealso cref="AssetBundleRequest"/>
-	public struct AssetBundleRequestAwaiter<T> : INotifyCompletion where T : UnityEngine.Object
+	public struct AssetBundleRequestAwaiter<T> : ICriticalNotifyCompletion where T : UnityEngine.Object
 	{
 		private readonly AssetBundleRequest _op;
 
@@ -42,6 +42,11 @@ namespace UnityFx.Tasks.CompilerServices
 		}
 
 		public void OnCompleted(Action continuation)
+		{
+			_op.completed += op => continuation();
+		}
+
+		public void UnsafeOnCompleted(Action continuation)
 		{
 			_op.completed += op => continuation();
 		}

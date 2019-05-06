@@ -12,7 +12,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// This type is intended for compiler use only.
 	/// </summary>
 	/// <seealso cref="AsyncOperation"/>
-	public struct AsyncOperationAwaiter : INotifyCompletion
+	public struct AsyncOperationAwaiter : ICriticalNotifyCompletion
 	{
 		private readonly AsyncOperation _op;
 
@@ -34,6 +34,11 @@ namespace UnityFx.Tasks.CompilerServices
 		}
 
 		public void OnCompleted(Action continuation)
+		{
+			_op.completed += op => continuation();
+		}
+
+		public void UnsafeOnCompleted(Action continuation)
 		{
 			_op.completed += op => continuation();
 		}

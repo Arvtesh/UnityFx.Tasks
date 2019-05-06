@@ -13,7 +13,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// This type is intended for compiler use only.
 	/// </summary>
 	/// <seealso cref="UnityWebRequest"/>
-	public struct UnityWebRequestAwaiter<T> : INotifyCompletion where T : class
+	public struct UnityWebRequestAwaiter<T> : ICriticalNotifyCompletion where T : class
 	{
 		private readonly UnityWebRequest _request;
 
@@ -36,6 +36,11 @@ namespace UnityFx.Tasks.CompilerServices
 		}
 
 		public void OnCompleted(Action continuation)
+		{
+			TaskUtility.AddCompletionCallback(_request, continuation);
+		}
+
+		public void UnsafeOnCompleted(Action continuation)
 		{
 			TaskUtility.AddCompletionCallback(_request, continuation);
 		}

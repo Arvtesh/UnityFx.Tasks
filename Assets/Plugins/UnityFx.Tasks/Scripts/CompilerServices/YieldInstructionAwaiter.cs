@@ -13,7 +13,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// This type is intended for compiler use only.
 	/// </summary>
 	/// <seealso cref="YieldInstruction"/>
-	public class YieldInstructionAwaiter : IEnumerator, INotifyCompletion
+	public class YieldInstructionAwaiter : IEnumerator, ICriticalNotifyCompletion
 	{
 		#region data
 
@@ -52,6 +52,11 @@ namespace UnityFx.Tasks.CompilerServices
 
 			// NOTE: This call always schedules the continuation on the Unity thread. This differs from Task awaiter behavior (continue on the same thread).
 			TaskUtility.StartCoroutine(this);
+		}
+
+		public void UnsafeOnCompleted(Action continuation)
+		{
+			OnCompleted(continuation);
 		}
 
 		#endregion
