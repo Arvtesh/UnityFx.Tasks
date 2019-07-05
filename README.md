@@ -13,8 +13,7 @@ At this moment [Unity3d](https://unity3d.com) does not provide support neither f
 
 ## Getting Started
 ### Prerequisites
-You may need the following software installed in order to build/use the library:
-- [Microsoft Visual Studio 2017](https://www.visualstudio.com/vs/community/).
+You may need the following software installed in order to use the library:
 - [Unity3d](https://store.unity.com/) (the minimum supported version is **2017.2**).
 
 ### Getting the code
