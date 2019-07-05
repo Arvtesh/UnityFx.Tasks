@@ -1,7 +1,7 @@
 {
     "name": "com.arvtesh.tasks",
-    "version": "0.3.0",
-    "displayName": "Task extensions for Unity3d",
+    "version": "0.3.1",
+    "displayName": "Task extensions for Unity",
     "description": "Provides a set of extension methods and utilities to make async/await usable in Unity.",
     "unity": "2017.2",
     "keywords": [
@@ -11,9 +11,20 @@
         "async",
         "await"
     ],
-    "author": {
+    "category": "UnityFx",
+    "author":
+    {
         "name": "Arvtesh",
         "email": "arvtesh@gmail.com",
         "url": "https://github.com/Arvtesh"
-    }
+    },
+	"license": "MIT",
+	"homepage": "https://github.com/Arvtesh/UnityFx.Tasks",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Arvtesh/UnityFx.Tasks"
+	},
+	"bugs": {
+		"url": "https://github.com/Arvtesh/UnityFx.Tasks/issues"
+	}
 }
