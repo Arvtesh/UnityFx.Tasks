@@ -19,11 +19,16 @@ namespace UnityFx.Tasks
 	{
 		#region data
 
-		private static SynchronizationContext _mainThreadContext;
-		private static TaskUtilityBehaviour _rootBehaviour;
-		private static SendOrPostCallback _startCoroutineCallback;
-		private static SendOrPostCallback _stopCoroutineCallback;
-		private static SendOrPostCallback _stopAllCoroutinesCallback;
+		private class TaskUtilityData
+		{
+			public SynchronizationContext MainThreadContext;
+			public TaskUtilityBehaviour RootBehaviour;
+			public SendOrPostCallback StartCoroutineCallback;
+			public SendOrPostCallback StopCoroutineCallback;
+			public SendOrPostCallback StopAllCoroutinesCallback;
+		}
+
+		private static TaskUtilityData _data = new TaskUtilityData();
 
 		#endregion
 
@@ -36,7 +41,7 @@ namespace UnityFx.Tasks
 		{
 			get
 			{
-				return SynchronizationContext.Current == _mainThreadContext;
+				return SynchronizationContext.Current == _data.MainThreadContext;
 			}
 		}
 
@@ -45,7 +50,7 @@ namespace UnityFx.Tasks
 		/// </summary>
 		public static CompilerServices.UnityThreadAwaitable YieldToUnityThread()
 		{
-			return new CompilerServices.UnityThreadAwaitable(_mainThreadContext);
+			return new CompilerServices.UnityThreadAwaitable(_data.MainThreadContext);
 		}
 
 		/// <summary>
@@ -253,13 +258,13 @@ namespace UnityFx.Tasks
 				{
 					if (result.TrySetCanceled(cancellationToken))
 					{
-						_rootBehaviour.StopCoroutine(enumOp);
+						_data.RootBehaviour.StopCoroutine(enumOp);
 					}
 				},
 				true);
 			}
 
-			_rootBehaviour.StartCoroutine(enumOp);
+			_data.RootBehaviour.StartCoroutine(enumOp);
 			return result.Task;
 		}
 
@@ -278,18 +283,27 @@ namespace UnityFx.Tasks
 				throw new ArgumentNullException(nameof(enumerator));
 			}
 
-			if (SynchronizationContext.Current == _mainThreadContext)
+			if (SynchronizationContext.Current == _data.MainThreadContext)
 			{
-				_rootBehaviour.StartCoroutine(enumerator);
+				if (_data.RootBehaviour)
+				{
+					_data.RootBehaviour.StartCoroutine(enumerator);
+				}
 			}
 			else
 			{
-				if (_startCoroutineCallback == null)
+				if (_data.StartCoroutineCallback == null)
 				{
-					_startCoroutineCallback = state => _rootBehaviour.StartCoroutine(state as IEnumerator);
+					_data.StartCoroutineCallback = state =>
+					{
+						if (_data.RootBehaviour)
+						{
+							_data.RootBehaviour.StartCoroutine(state as IEnumerator);
+						}
+					};
 				}
 
-				_mainThreadContext.Post(_startCoroutineCallback, enumerator);
+				_data.MainThreadContext.Post(_data.StartCoroutineCallback, enumerator);
 			}
 		}
 
@@ -302,20 +316,20 @@ namespace UnityFx.Tasks
 		/// <seealso cref="StopAllCoroutines"/>
 		public static void StopCoroutine(IEnumerator enumerator)
 		{
-			if (enumerator != null && _rootBehaviour)
+			if (enumerator != null && _data.RootBehaviour)
 			{
-				if (SynchronizationContext.Current == _mainThreadContext)
+				if (SynchronizationContext.Current == _data.MainThreadContext)
 				{
-					_rootBehaviour.StopCoroutine(enumerator);
+					_data.RootBehaviour.StopCoroutine(enumerator);
 				}
 				else
 				{
-					if (_stopCoroutineCallback == null)
+					if (_data.StopCoroutineCallback == null)
 					{
-						_stopCoroutineCallback = state => _rootBehaviour.StopCoroutine(state as IEnumerator);
+						_data.StopCoroutineCallback = state => _data.RootBehaviour.StopCoroutine(state as IEnumerator);
 					}
 
-					_mainThreadContext.Post(_stopCoroutineCallback, enumerator);
+					_data.MainThreadContext.Post(_data.StopCoroutineCallback, enumerator);
 				}
 			}
 		}
@@ -328,20 +342,20 @@ namespace UnityFx.Tasks
 		/// <seealso cref="StopCoroutine(IEnumerator)"/>
 		public static void StopAllCoroutines()
 		{
-			if (_rootBehaviour)
+			if (_data.RootBehaviour)
 			{
-				if (SynchronizationContext.Current == _mainThreadContext)
+				if (SynchronizationContext.Current == _data.MainThreadContext)
 				{
-					_rootBehaviour.StopAllCoroutines();
+					_data.RootBehaviour.StopAllCoroutines();
 				}
 				else
 				{
-					if (_stopAllCoroutinesCallback == null)
+					if (_data.StopAllCoroutinesCallback == null)
 					{
-						_stopAllCoroutinesCallback = state => _rootBehaviour.StopAllCoroutines();
+						_data.StopAllCoroutinesCallback = state => _data.RootBehaviour.StopAllCoroutines();
 					}
 
-					_mainThreadContext.Post(_stopAllCoroutinesCallback, null);
+					_data.MainThreadContext.Post(_data.StopAllCoroutinesCallback, null);
 				}
 			}
 		}
@@ -349,18 +363,18 @@ namespace UnityFx.Tasks
 		internal static void Initialize(GameObject go, SynchronizationContext mainThreadContext)
 		{
 			// NOTE: Should only be called once.
-			if (_rootBehaviour)
+			if (_data.RootBehaviour)
 			{
 				throw new InvalidOperationException();
 			}
 
-			_mainThreadContext = mainThreadContext;
-			_rootBehaviour = go.AddComponent<TaskUtilityBehaviour>();
+			_data.MainThreadContext = mainThreadContext;
+			_data.RootBehaviour = go.AddComponent<TaskUtilityBehaviour>();
 		}
 
 		internal static void AddCompletionCallback(UnityWebRequest request, Action action)
 		{
-			_rootBehaviour.AddCompletionCallback(request, action);
+			_data.RootBehaviour.AddCompletionCallback(request, action);
 		}
 
 		#endregion

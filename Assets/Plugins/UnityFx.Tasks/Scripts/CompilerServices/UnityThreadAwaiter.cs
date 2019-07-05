@@ -11,7 +11,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// Provides an awaitable object that allows for configured awaits on the Unity thread.
 	/// This type is intended for compiler use only.
 	/// </summary>
-	public struct UnityThreadAwaiter : INotifyCompletion
+	public struct UnityThreadAwaiter : ICriticalNotifyCompletion
 	{
 		private readonly SynchronizationContext _unityThreadContext;
 
@@ -35,6 +35,11 @@ namespace UnityFx.Tasks.CompilerServices
 		public void OnCompleted(Action continuation)
 		{
 			_unityThreadContext.Post(args => ((Action)args).Invoke(), continuation);
+		}
+
+		public void UnsafeOnCompleted(Action continuation)
+		{
+			OnCompleted(continuation);
 		}
 	}
 }
