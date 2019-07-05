@@ -25,6 +25,17 @@ git submodule -q update --init
 ### Getting binaries
 The [Unity Asset Store package](https://assetstore.unity.com/packages/slug/143705) can be installed using the editor. One can also download it directly from [Github releases](https://github.com/Arvtesh/UnityFx.Tasks/releases).
 
+### UPM package
+
+UPM package source is available at [Github](https://github.com/Arvtesh/UnityFx.Tasks/tree/upm). To use it, add the following line to dependencies section of your `manifest.json`. Unity should download and link the package automatically:
+```json
+{
+  "dependencies": {
+    "com.arvtesh.tasks": "https://github.com/Arvtesh/UnityFx.Tasks.git#upm"
+  }
+}
+```
+
 ## Using the library
 The library tools are locates in a single namespace:
 ```csharp
