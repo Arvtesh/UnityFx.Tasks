@@ -4,7 +4,7 @@
 Task extensions for Unity3d.
 
 ## SUPPORT
-[E-mail](mailto:arvtesh@gmail.com)
+[Support E-mail](mailto:arvtesh@gmail.com).
 
 ## USEFUL LINKS
 * [Github project](https://github.com/Arvtesh/UnityFx.Tasks)

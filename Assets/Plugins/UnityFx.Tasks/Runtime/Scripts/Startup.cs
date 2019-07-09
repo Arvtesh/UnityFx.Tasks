@@ -24,7 +24,7 @@ namespace UnityFx.Tasks
 		private static void Initialize()
 		{
 			var context = SynchronizationContext.Current;
-			Debug.Assert(context != null, "SynchronizationContext is expected to set by Unity.");
+			Debug.Assert(context != null, "SynchronizationContext is expected to be set by Unity.");
 
 			// Create helper GameObject
 			var go = new GameObject("UnityFx.Tasks")

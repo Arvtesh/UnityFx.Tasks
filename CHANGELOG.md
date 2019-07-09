@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/); this project adheres to [Semantic Versioning](http://semver.org/).
 
 -----------------------
+## [0.3.0] - unreleased
+
+### Added
+- Added Unity Package Manager support.
+
+-----------------------
 ## [0.2.0] - unreleased
 
 ### Added
