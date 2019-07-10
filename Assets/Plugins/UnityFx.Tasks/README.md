@@ -5,7 +5,7 @@ Task extensions for Unity. Provides a set of extension methods and utilities to 
 
 ## USEFUL LINKS
 * [Github project](https://github.com/Arvtesh/UnityFx.Tasks)
-* [npm package](https://npmjs.com/package/arvtesh/com.unityfx.tasks)
+* [npm package](https://www.npmjs.com/package/com.unityfx.tasks)
 * [Unity Asset Store](https://assetstore.unity.com/packages/slug/143705)
 * [Documentation](https://github.com/Arvtesh/UnityFx.Tasks/blob/master/README.md)
 * [License](https://github.com/Arvtesh/UnityFx.Tasks/blob/master/LICENSE.md)

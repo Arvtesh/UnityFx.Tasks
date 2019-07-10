@@ -3,6 +3,7 @@
 Channel  | UnityFx.Tasks |
 ---------|---------------|
 Github | [![GitHub release](https://img.shields.io/github/release/Arvtesh/UnityFx.Task.svg?logo=github)](https://github.com/Arvtesh/UnityFx.Task/releases)
+Npm | [![Npm release](https://img.shields.io/npm/v/com.unityfx.tasks.svg)](https://www.npmjs.com/package/com.unityfx.tasks)
 Unity Asset Store | [![Task extensions for Unity](https://img.shields.io/badge/tools-v0.2.0-green.svg)](https://assetstore.unity.com/packages/slug/143705)
 
 **Requires Unity 2017.2 or higher.**
@@ -25,15 +26,24 @@ git submodule -q update --init
 ### Getting binaries
 The [Unity Asset Store package](https://assetstore.unity.com/packages/slug/143705) can be installed using the editor. One can also download it directly from [Github releases](https://github.com/Arvtesh/UnityFx.Tasks/releases).
 
-### UPM package
+### Npm package
 
-UPM package source is available at [Github](https://github.com/Arvtesh/UnityFx.Tasks/tree/upm). To use it, add the following line to dependencies section of your `manifest.json`. Unity should download and link the package automatically:
+Npm package is available at [npmjs.com](https://www.npmjs.com/package/com.unityfx.tasks). To use it, add the following line to dependencies section of your `manifest.json`. Unity should download and link the package automatically:
 ```json
 {
+  "scopedRegistries": [
+    {
+      "name": "Arvtesh",
+      "url": "https://registry.npmjs.org/",
+      "scopes": [
+        "com.unityfx"
+      ]
+    }
+  ],
   "dependencies": {
-    "com.arvtesh.tasks": "https://github.com/Arvtesh/UnityFx.Tasks.git#upm"
+    "com.unityfx.tasks": "0.2.0"
   }
-}
+} 
 ```
 
 ## Using the library
