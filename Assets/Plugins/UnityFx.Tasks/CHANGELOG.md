@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/); this project adheres to [Semantic Versioning](http://semver.org/).
 
 -----------------------
-## [0.2.0] - unreleased
+## [0.2.0] - 2019.07.10
 
 ### Added
 - Added `ConfigureAwait` extensions for built-in Unity async operations.
@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/); this proj
 - Added support for loading arrays of objects from asset bundles via `LoadAllAssetsTaskAsync` extension methds.
 - Added `TaskUtility.YieldToUnityThread` method that can yield execution to Unity thread.
 - Added `TaskUtility.LoadAssetAsync` helpers.
+- Added `npm` support.
 - Added examples.
 
 ### Fixed
