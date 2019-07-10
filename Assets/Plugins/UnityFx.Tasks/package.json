@@ -1,0 +1,28 @@
+{
+    "name": "com.unityfx.tasks",
+    "version": "0.2.0",
+    "displayName": "Task extensions for Unity",
+    "description": "Provides a set of extension methods and utilities to make async/await usable in Unity. Requires .NET 4.6 or higher.",
+    "unity": "2017.2",
+    "keywords": [
+        "UnityFx",
+        "UnityFx.Tasks",
+        "Task",
+        "async",
+        "await"
+    ],
+    "category": "UnityFx",
+    "author": {
+        "name": "Arvtesh",
+        "email": "arvtesh@gmail.com"
+    },
+    "license": "MIT",
+    "homepage": "https://github.com/Arvtesh/UnityFx.Tasks",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Arvtesh/UnityFx.Tasks.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Arvtesh/UnityFx.Tasks/issues"
+    }
+}
