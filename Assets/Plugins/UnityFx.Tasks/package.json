@@ -1,6 +1,6 @@
 {
     "name": "com.unityfx.tasks",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "displayName": "Task extensions for Unity",
     "description": "Provides a set of extension methods and utilities to make async/await usable in Unity. Requires .NET 4.6 or higher.",
     "unity": "2017.2",

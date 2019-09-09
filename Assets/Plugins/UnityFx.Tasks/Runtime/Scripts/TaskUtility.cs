@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexander Bogarsukov.
+﻿// Copyright (c) 2018-2019 Alexander Bogarsukov.
 // Licensed under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using System;
@@ -362,12 +362,9 @@ namespace UnityFx.Tasks
 
 		internal static void Initialize(GameObject go, SynchronizationContext mainThreadContext)
 		{
-			// NOTE: Should only be called once.
-			if (_data.RootBehaviour)
-			{
-				throw new InvalidOperationException();
-			}
+			Debug.Assert(ReferenceEquals(_data.RootBehaviour, null));
 
+			// NOTE: Should only be called once.
 			_data.MainThreadContext = mainThreadContext;
 			_data.RootBehaviour = go.AddComponent<TaskUtilityBehaviour>();
 		}
