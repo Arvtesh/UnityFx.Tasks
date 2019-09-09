@@ -27,6 +27,7 @@ git submodule -q update --init
 The [Unity Asset Store package](https://assetstore.unity.com/packages/slug/143705) can be installed using the editor. One can also download it directly from [Github releases](https://github.com/Arvtesh/UnityFx.Tasks/releases).
 
 ### Npm package
+[![NPM](https://nodei.co/npm/com.unityfx.tasks.png)](https://www.npmjs.com/package/com.unityfx.tasks)
 
 Npm package is available at [npmjs.com](https://www.npmjs.com/package/com.unityfx.tasks). To use it, add the following line to dependencies section of your `manifest.json`. Unity should download and link the package automatically:
 ```json
@@ -43,7 +44,7 @@ Npm package is available at [npmjs.com](https://www.npmjs.com/package/com.unityf
   "dependencies": {
     "com.unityfx.tasks": "0.2.0"
   }
-} 
+}
 ```
 
 ## Using the library
