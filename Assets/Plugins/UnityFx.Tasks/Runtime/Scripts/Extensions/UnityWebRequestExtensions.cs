@@ -73,11 +73,11 @@ namespace UnityFx.Tasks
 
 				if (request.isModifiable)
 				{
-					request.SendWebRequest().completed += op => OnTaskCompleted(result, request);
+					request.SendWebRequest().completed += op => OnTaskCompleted(result, request, null);
 				}
 				else
 				{
-					TaskUtility.AddCompletionCallback(request, () => OnTaskCompleted(result, request));
+					TaskUtility.AddCompletionCallback(request, () => OnTaskCompleted(result, request, null));
 				}
 
 				return result.Task;
@@ -93,7 +93,20 @@ namespace UnityFx.Tasks
 		/// <seealso cref="ToTask{T}(UnityWebRequest, CancellationToken)"/>
 		public static Task<T> ToTask<T>(this UnityWebRequest request) where T : class
 		{
-			return ToTask<T>(request, CancellationToken.None);
+			return ToTask<T>(request, null, CancellationToken.None);
+		}
+
+		/// <summary>
+		/// Creates an <see cref="Task{TResult}"/> wrapper for the specified <see cref="UnityWebRequest"/>. The method calls <see cref="UnityWebRequest.SendWebRequest"/> (if not called).
+		/// </summary>
+		/// <typeparam name="T">Type of the request result value.</typeparam>
+		/// <param name="request">The source web request.</param>
+		/// <param name="resultDelegate">An optional delegate that is used to get the request result.</param>
+		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask{T}(UnityWebRequest, CancellationToken)"/>
+		public static Task<T> ToTask<T>(this UnityWebRequest request, Func<UnityWebRequest, T> resultDelegate) where T : class
+		{
+			return ToTask<T>(request, resultDelegate, CancellationToken.None);
 		}
 
 		/// <summary>
@@ -101,10 +114,11 @@ namespace UnityFx.Tasks
 		/// </summary>
 		/// <typeparam name="T">Type of the request result value.</typeparam>
 		/// <param name="request">The source web request.</param>
+		/// <param name="resultDelegate">An optional delegate that is used to get the request result.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
 		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
 		/// <seealso cref="ToTask{T}(UnityWebRequest)"/>
-		public static Task<T> ToTask<T>(this UnityWebRequest request, CancellationToken cancellationToken) where T : class
+		public static Task<T> ToTask<T>(this UnityWebRequest request, Func<UnityWebRequest, T> resultDelegate, CancellationToken cancellationToken) where T : class
 		{
 			if (cancellationToken.IsCancellationRequested)
 			{
@@ -118,6 +132,10 @@ namespace UnityFx.Tasks
 				if (request.isHttpError || request.isNetworkError)
 				{
 					return Task.FromException<T>(new UnityWebRequestException(request.error, request.responseCode));
+				}
+				else if (resultDelegate != null)
+				{
+					return Task.FromResult(resultDelegate(request));
 				}
 				else
 				{
@@ -142,11 +160,11 @@ namespace UnityFx.Tasks
 
 				if (request.isModifiable)
 				{
-					request.SendWebRequest().completed += op => OnTaskCompleted(result, request);
+					request.SendWebRequest().completed += op => OnTaskCompleted(result, request, resultDelegate);
 				}
 				else
 				{
-					TaskUtility.AddCompletionCallback(request, () => OnTaskCompleted(result, request));
+					TaskUtility.AddCompletionCallback(request, () => OnTaskCompleted(result, request, resultDelegate));
 				}
 
 				return result.Task;
@@ -242,11 +260,21 @@ namespace UnityFx.Tasks
 			return null;
 		}
 
-		private static void OnTaskCompleted<T>(TaskCompletionSource<T> tcs, UnityWebRequest request) where T : class
+		private static void OnTaskCompleted<T>(TaskCompletionSource<T> tcs, UnityWebRequest request, Func<UnityWebRequest, T> resultDelegate) where T : class
 		{
 			try
 			{
-				var requestResult = GetResult<T>(request);
+				T requestResult;
+
+				if (resultDelegate != null)
+				{
+					requestResult = resultDelegate(request);
+				}
+				else
+				{
+					requestResult = GetResult<T>(request);
+				}
+
 				tcs.TrySetResult(requestResult);
 			}
 			catch (Exception e)
