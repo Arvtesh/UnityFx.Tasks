@@ -23,9 +23,10 @@ namespace UnityFx.Tasks
 		/// <param name="request">The source web request.</param>
 		/// <returns>Returns a <see cref="Task"/> instance that can be used to track the operation state.</returns>
 		/// <seealso cref="ToTask(UnityWebRequest, CancellationToken)"/>
+		/// <seealso cref="ToTask(UnityWebRequest, CancellationToken, UnityWebRequestOptions)"/>
 		public static Task ToTask(this UnityWebRequest request)
 		{
-			return ToTask(request, CancellationToken.None);
+			return ToTask(request, CancellationToken.None, UnityWebRequestOptions.None);
 		}
 
 		/// <summary>
@@ -35,25 +36,57 @@ namespace UnityFx.Tasks
 		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
 		/// <returns>Returns a <see cref="Task"/> instance that can be used to track the operation state.</returns>
 		/// <seealso cref="ToTask(UnityWebRequest)"/>
+		/// <seealso cref="ToTask(UnityWebRequest, CancellationToken, UnityWebRequestOptions)"/>
 		public static Task ToTask(this UnityWebRequest request, CancellationToken cancellationToken)
+		{
+			return ToTask(request, cancellationToken, UnityWebRequestOptions.None);
+		}
+
+		/// <summary>
+		/// Creates a cancellable <see cref="Task"/> wrapper for the specified <see cref="UnityWebRequest"/>. The method calls <see cref="UnityWebRequest.SendWebRequest"/> (if not called).
+		/// </summary>
+		/// <param name="request">The source web request.</param>
+		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
+		/// <param name="options">Options mask.</param>
+		/// <returns>Returns a <see cref="Task"/> instance that can be used to track the operation state.</returns>
+		/// <seealso cref="ToTask(UnityWebRequest)"/>
+		/// <seealso cref="ToTask(UnityWebRequest, CancellationToken)"/>
+		public static Task ToTask(this UnityWebRequest request, CancellationToken cancellationToken, UnityWebRequestOptions options)
 		{
 			if (cancellationToken.IsCancellationRequested)
 			{
 				request.Abort();
+
+				// Dispose the request is needed.
+				if ((options & UnityWebRequestOptions.AutoDispose) != 0)
+				{
+					request.Dispose();
+				}
+
 				return Task.FromCanceled(cancellationToken);
 			}
 
 			if (request.isDone)
 			{
+				Task result;
+
 				// NOTE: Short path for completed requests.
 				if (request.isHttpError || request.isNetworkError)
 				{
-					return Task.FromException(new UnityWebRequestException(request.error, request.responseCode));
+					result = Task.FromException(new UnityWebRequestException(request.error, request.responseCode));
 				}
 				else
 				{
-					return Task.CompletedTask;
+					result = Task.CompletedTask;
 				}
+
+				// Dispose the request is needed.
+				if ((options & UnityWebRequestOptions.AutoDispose) != 0)
+				{
+					request.Dispose();
+				}
+
+				return result;
 			}
 			else
 			{
@@ -66,6 +99,12 @@ namespace UnityFx.Tasks
 						if (result.TrySetCanceled(cancellationToken))
 						{
 							request.Abort();
+
+							// Dispose the request is needed.
+							if ((options & UnityWebRequestOptions.AutoDispose) != 0)
+							{
+								request.Dispose();
+							}
 						}
 					},
 					true);
@@ -73,11 +112,11 @@ namespace UnityFx.Tasks
 
 				if (request.isModifiable)
 				{
-					request.SendWebRequest().completed += op => OnTaskCompleted(result, request, null);
+					request.SendWebRequest().completed += op => OnTaskCompleted(result, request, null, options);
 				}
 				else
 				{
-					TaskUtility.AddCompletionCallback(request, () => OnTaskCompleted(result, request, null));
+					TaskUtility.AddCompletionCallback(request, () => OnTaskCompleted(result, request, null, options));
 				}
 
 				return result.Task;
@@ -90,10 +129,11 @@ namespace UnityFx.Tasks
 		/// <typeparam name="T">Type of the request result value.</typeparam>
 		/// <param name="request">The source web request.</param>
 		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
-		/// <seealso cref="ToTask{T}(UnityWebRequest, CancellationToken)"/>
+		/// <seealso cref="ToTask{T}(UnityWebRequest, Func{UnityWebRequest, T})"/>
+		/// <seealso cref="ToTask{T}(UnityWebRequest, Func{UnityWebRequest, T}, CancellationToken, UnityWebRequestOptions)"/>
 		public static Task<T> ToTask<T>(this UnityWebRequest request) where T : class
 		{
-			return ToTask<T>(request, null, CancellationToken.None);
+			return ToTask<T>(request, null, CancellationToken.None, UnityWebRequestOptions.None);
 		}
 
 		/// <summary>
@@ -103,10 +143,11 @@ namespace UnityFx.Tasks
 		/// <param name="request">The source web request.</param>
 		/// <param name="resultDelegate">An optional delegate that is used to get the request result.</param>
 		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
-		/// <seealso cref="ToTask{T}(UnityWebRequest, CancellationToken)"/>
+		/// <seealso cref="ToTask{T}(UnityWebRequest)"/>
+		/// <seealso cref="ToTask{T}(UnityWebRequest, Func{UnityWebRequest, T}, CancellationToken, UnityWebRequestOptions)"/>
 		public static Task<T> ToTask<T>(this UnityWebRequest request, Func<UnityWebRequest, T> resultDelegate) where T : class
 		{
-			return ToTask<T>(request, resultDelegate, CancellationToken.None);
+			return ToTask(request, resultDelegate, CancellationToken.None, UnityWebRequestOptions.None);
 		}
 
 		/// <summary>
@@ -116,31 +157,50 @@ namespace UnityFx.Tasks
 		/// <param name="request">The source web request.</param>
 		/// <param name="resultDelegate">An optional delegate that is used to get the request result.</param>
 		/// <param name="cancellationToken">A token that can be used to cancel the request.</param>
+		/// <param name="options">Options mask.</param>
 		/// <returns>Returns a <see cref="Task{TResult}"/> instance that can be used to track the operation state.</returns>
 		/// <seealso cref="ToTask{T}(UnityWebRequest)"/>
-		public static Task<T> ToTask<T>(this UnityWebRequest request, Func<UnityWebRequest, T> resultDelegate, CancellationToken cancellationToken) where T : class
+		/// <seealso cref="ToTask{T}(UnityWebRequest, Func{UnityWebRequest, T})"/>
+		public static Task<T> ToTask<T>(this UnityWebRequest request, Func<UnityWebRequest, T> resultDelegate, CancellationToken cancellationToken, UnityWebRequestOptions options) where T : class
 		{
 			if (cancellationToken.IsCancellationRequested)
 			{
 				request.Abort();
+
+				// Dispose the request is needed.
+				if ((options & UnityWebRequestOptions.AutoDispose) != 0)
+				{
+					request.Dispose();
+				}
+
 				return Task.FromCanceled<T>(cancellationToken);
 			}
 
 			if (request.isDone)
 			{
+				Task<T> result;
+
 				// NOTE: Short path for completed requests.
 				if (request.isHttpError || request.isNetworkError)
 				{
-					return Task.FromException<T>(new UnityWebRequestException(request.error, request.responseCode));
+					result = Task.FromException<T>(new UnityWebRequestException(request.error, request.responseCode));
 				}
 				else if (resultDelegate != null)
 				{
-					return Task.FromResult(resultDelegate(request));
+					result = Task.FromResult(resultDelegate(request));
 				}
 				else
 				{
-					return Task.FromResult(GetResultInternal<T>(request));
+					result = Task.FromResult(GetResultInternal<T>(request));
 				}
+
+				// Dispose the request is needed.
+				if ((options & UnityWebRequestOptions.AutoDispose) != 0)
+				{
+					request.Dispose();
+				}
+
+				return result;
 			}
 			else
 			{
@@ -153,6 +213,12 @@ namespace UnityFx.Tasks
 						if (result.TrySetCanceled(cancellationToken))
 						{
 							request.Abort();
+
+							// Dispose the request is needed.
+							if ((options & UnityWebRequestOptions.AutoDispose) != 0)
+							{
+								request.Dispose();
+							}
 						}
 					},
 					true);
@@ -160,11 +226,11 @@ namespace UnityFx.Tasks
 
 				if (request.isModifiable)
 				{
-					request.SendWebRequest().completed += op => OnTaskCompleted(result, request, resultDelegate);
+					request.SendWebRequest().completed += op => OnTaskCompleted(result, request, resultDelegate, options);
 				}
 				else
 				{
-					TaskUtility.AddCompletionCallback(request, () => OnTaskCompleted(result, request, resultDelegate));
+					TaskUtility.AddCompletionCallback(request, () => OnTaskCompleted(result, request, resultDelegate, options));
 				}
 
 				return result.Task;
@@ -260,7 +326,7 @@ namespace UnityFx.Tasks
 			return null;
 		}
 
-		private static void OnTaskCompleted<T>(TaskCompletionSource<T> tcs, UnityWebRequest request, Func<UnityWebRequest, T> resultDelegate) where T : class
+		private static void OnTaskCompleted<T>(TaskCompletionSource<T> tcs, UnityWebRequest request, Func<UnityWebRequest, T> resultDelegate, UnityWebRequestOptions options) where T : class
 		{
 			try
 			{
@@ -280,6 +346,13 @@ namespace UnityFx.Tasks
 			catch (Exception e)
 			{
 				tcs.TrySetException(e);
+			}
+			finally
+			{
+				if ((options & UnityWebRequestOptions.AutoDispose) != 0)
+				{
+					request.Dispose();
+				}
 			}
 		}
 
