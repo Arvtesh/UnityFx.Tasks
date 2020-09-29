@@ -37,26 +37,28 @@ namespace UnityFx.Tasks
 			{
 				return Task.CompletedTask;
 			}
+			else if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled(cancellationToken);
+			}
 			else
 			{
-				if (cancellationToken.IsCancellationRequested)
-				{
-					return Task.FromCanceled(cancellationToken);
-				}
-
-				var result = new TaskCompletionSource<object>(op);
+				var tcs = new TaskCompletionSource<object>(op);
 
 				if (cancellationToken.CanBeCanceled)
 				{
-					cancellationToken.Register(() => result.TrySetCanceled(cancellationToken));
+					cancellationToken.Register(() =>
+					{
+						tcs.TrySetCanceled(cancellationToken);
+					});
 				}
 
 				op.completed += o =>
 				{
-					result.TrySetResult(null);
+					tcs.TrySetResult(null);
 				};
 
-				return result.Task;
+				return tcs.Task;
 			}
 		}
 
@@ -107,48 +109,48 @@ namespace UnityFx.Tasks
 		{
 			if (op.isDone)
 			{
-				if (op.asset is T)
+				if (op.asset is T result)
 				{
-					return Task.FromResult(op.asset as T);
+					return Task.FromResult(result);
 				}
 				else
 				{
 					return Task.FromException<T>(new UnityAssetLoadException(typeof(T)));
 				}
 			}
+			else if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled<T>(cancellationToken);
+			}
 			else
 			{
-				if (cancellationToken.IsCancellationRequested)
-				{
-					return Task.FromCanceled<T>(cancellationToken);
-				}
-
-				var result = new TaskCompletionSource<T>(op);
+				var tcs = new TaskCompletionSource<T>(op);
 
 				if (cancellationToken.CanBeCanceled)
 				{
-					cancellationToken.Register(() => result.TrySetCanceled(cancellationToken));
+					cancellationToken.Register(() =>
+					{
+						tcs.TrySetCanceled(cancellationToken);
+					});
 				}
 
 				op.completed += o =>
 				{
-					var asset = op.asset as T;
-
-					if (asset)
+					if (op.asset is T loadedAsset)
 					{
 						// NOTE: TrySetResult() failure means that the operation was cancelled, thus the resource should be unloaded.
-						if (!result.TrySetResult(asset))
+						if (!tcs.TrySetResult(loadedAsset))
 						{
-							Resources.UnloadAsset(asset);
+							Resources.UnloadAsset(loadedAsset);
 						}
 					}
 					else
 					{
-						result.TrySetException(new UnityAssetLoadException(typeof(T)));
+						tcs.TrySetException(new UnityAssetLoadException(typeof(T)));
 					}
 				};
 
-				return result.Task;
+				return tcs.Task;
 			}
 		}
 
@@ -187,18 +189,20 @@ namespace UnityFx.Tasks
 					return Task.FromException<T>(new UnityAssetLoadException(typeof(T)));
 				}
 			}
+			else if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled<T>(cancellationToken);
+			}
 			else
 			{
-				if (cancellationToken.IsCancellationRequested)
-				{
-					return Task.FromCanceled<T>(cancellationToken);
-				}
-
 				var tcs = new TaskCompletionSource<T>(op);
 
 				if (cancellationToken.CanBeCanceled)
 				{
-					cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken));
+					cancellationToken.Register(() =>
+					{
+						tcs.TrySetCanceled(cancellationToken);
+					});
 				}
 
 				op.completed += o =>
@@ -265,34 +269,41 @@ namespace UnityFx.Tasks
 					return Task.FromException<AssetBundle>(new UnityAssetLoadException(typeof(AssetBundle)));
 				}
 			}
+			else if (cancellationToken.IsCancellationRequested)
+			{
+				return Task.FromCanceled<AssetBundle>(cancellationToken);
+			}
 			else
 			{
-				if (cancellationToken.IsCancellationRequested)
-				{
-					return Task.FromCanceled<AssetBundle>(cancellationToken);
-				}
-
-				var result = new TaskCompletionSource<AssetBundle>(op);
+				var tcs = new TaskCompletionSource<AssetBundle>(op);
 
 				if (cancellationToken.CanBeCanceled)
 				{
-					cancellationToken.Register(() => result.TrySetCanceled(cancellationToken));
+					cancellationToken.Register(() =>
+					{
+						tcs.TrySetCanceled(cancellationToken);
+					});
 				}
 
 				op.completed += o =>
 				{
-					if (!op.assetBundle)
+					var assetBundle = op.assetBundle;
+
+					if (assetBundle)
 					{
-						result.TrySetException(new UnityAssetLoadException(typeof(AssetBundle)));
+						if (!tcs.TrySetResult(assetBundle))
+						{
+							// NOTE: TrySetResult() failure means that the operation was cancelled, thus the asset bundle should be unloaded.
+							assetBundle.Unload(true);
+						}
 					}
-					else if (!result.TrySetResult(op.assetBundle))
+					else
 					{
-						// NOTE: TrySetResult() failure means that the operation was cancelled, thus the asset bundle should be unloaded.
-						op.assetBundle.Unload(true);
+						tcs.TrySetException(new UnityAssetLoadException(typeof(AssetBundle)));
 					}
 				};
 
-				return result.Task;
+				return tcs.Task;
 			}
 		}
 
@@ -303,7 +314,7 @@ namespace UnityFx.Tasks
 				var assets = op.allAssets;
 
 				// NOTE: Cannot just cast op.allAssets to T (this would return null), have to create new array.
-				if (assets != null && assets.Length >= 0)
+				if (assets != null && assets.Length > 0)
 				{
 					var elementType = typeof(T).GetElementType();
 					var result = Array.CreateInstance(elementType, assets.Length);
@@ -311,13 +322,9 @@ namespace UnityFx.Tasks
 					return result as T;
 				}
 			}
-			else if (op.asset != null)
+			else if (op.asset is T result)
 			{
-				return op.asset as T;
-			}
-			else if (op.allAssets != null && op.allAssets.Length > 0)
-			{
-				return op.allAssets[0] as T;
+				return result;
 			}
 
 			return default(T);

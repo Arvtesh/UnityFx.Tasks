@@ -13,9 +13,6 @@ namespace UnityFx.Tasks
 	/// </summary>
 	public static class TaskExtensions
 	{
-		#region data
-		#endregion
-
 		#region interface
 
 		/// <summary>
@@ -25,9 +22,9 @@ namespace UnityFx.Tasks
 		/// <returns>Returns enumerator that can be used in Unity coroutine.</returns>
 		public static IEnumerator ToEnumerator(this IAsyncResult op)
 		{
-			if (op is IEnumerator)
+			if (op is IEnumerator e)
 			{
-				return op as IEnumerator;
+				return e;
 			}
 
 			return new TaskEnumerator(op);

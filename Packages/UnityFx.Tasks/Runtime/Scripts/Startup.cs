@@ -1,8 +1,8 @@
 ﻿// Copyright (c) 2018-2019 Alexander Bogarsukov.
 // Licensed under the MIT license. See the LICENSE.md file in the project root for more information.
 
-#if !UNITY_2017_2_OR_NEWER
-#error UnityFx.Tasks requires Unity 2017.2 or newer.
+#if !UNITY_2018_4_OR_NEWER
+#error UnityFx.Tasks requires Unity 2018.4 or newer.
 #endif
 
 #if NET_LEGACY || NET_2_0 || NET_2_0_SUBSET

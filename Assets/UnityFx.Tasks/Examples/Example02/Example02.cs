@@ -18,24 +18,7 @@ namespace UnityFx.Tasks.Examples
 			{
 				using (var www = UnityWebRequest.Get("google.com"))
 				{
-					var op = www.SendWebRequest();
-
-					// Await op completion.
-					await op;
-
-					// Can await www as well; if www.SendWebRequest() hasn't been called the await would never complete.
-					await www;
-
-					// Await op completion and get text result (can do the same with www).
-					var text = await op.ConfigureAwait<string>();
-					Debug.Log(text);
-				}
-
-				using (var www = UnityWebRequest.Get("yahoo.com"))
-				{
-					// Another way to await a web request is convert it to a Task instance. Note that SendWebRequest() is called automatically in this case.
-					var task = www.ToTask<string>();
-					var text = await task;
+					var text = await www.SendWebRequestAsync<string>();
 					Debug.Log(text);
 				}
 			}

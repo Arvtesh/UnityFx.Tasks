@@ -9,41 +9,46 @@ using UnityEngine.Networking;
 namespace UnityFx.Tasks.CompilerServices
 {
 	/// <summary>
-	/// Provides an awaitable object that allows for configured awaits on <see cref="UnityWebRequest"/>.
+	/// Provides an awaitable object that allows for configured awaits on <see cref="UnityWebRequestAsyncOperation"/>.
 	/// This type is intended for compiler use only.
 	/// </summary>
+	/// <seealso cref="UnityWebRequestAsyncOperation"/>
 	/// <seealso cref="UnityWebRequest"/>
 	public struct UnityWebRequestAwaiter : ICriticalNotifyCompletion
 	{
-		private readonly UnityWebRequest _request;
+		private readonly UnityWebRequestAsyncOperation _op;
 
-		public UnityWebRequestAwaiter(UnityWebRequest op)
+		public UnityWebRequestAwaiter(UnityWebRequestAsyncOperation op)
 		{
-			_request = op;
+			_op = op;
 		}
 
 		public bool IsCompleted
 		{
 			get
 			{
-				return _request.isDone;
+				return _op.webRequest.isDone;
 			}
 		}
 
 		public void GetResult()
 		{
-			_request.ThrowIfNotCompleted();
-			_request.ThrowIfFailed();
+			var request = _op.webRequest;
+
+			if (request.isNetworkError || request.isHttpError)
+			{
+				throw new UnityWebRequestException(request.error, request.responseCode);
+			}
 		}
 
 		public void OnCompleted(Action continuation)
 		{
-			TaskUtility.AddCompletionCallback(_request, continuation);
+			_op.completed += op => continuation();
 		}
 
 		public void UnsafeOnCompleted(Action continuation)
 		{
-			TaskUtility.AddCompletionCallback(_request, continuation);
+			OnCompleted(continuation);
 		}
 	}
 }

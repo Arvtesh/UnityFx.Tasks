@@ -8,21 +8,21 @@ using UnityEngine.Networking;
 namespace UnityFx.Tasks.CompilerServices
 {
 	/// <summary>
-	/// Provides an awaitable object that allows for configured awaits on <see cref="UnityWebRequest"/>.
+	/// Provides an awaitable object that allows for configured awaits on <see cref="UnityWebRequestAsyncOperation"/>.
 	/// This type is intended for compiler use only.
 	/// </summary>
-	/// <seealso cref="UnityWebRequestAwaiter{T}"/>
+	/// <seealso cref="UnityWebRequestAsyncOperation"/>
 	/// <seealso cref="UnityWebRequest"/>
-	public struct UnityWebRequestAwaitable<T> where T : class
+	public struct UnityWebRequestAwaitable
 	{
-		private readonly UnityWebRequestAwaiter<T> _awaiter;
+		private readonly UnityWebRequestAwaiter _awaiter;
 
-		public UnityWebRequestAwaitable(UnityWebRequest op)
+		public UnityWebRequestAwaitable(UnityWebRequestAsyncOperation op)
 		{
-			_awaiter = new UnityWebRequestAwaiter<T>(op);
+			_awaiter = new UnityWebRequestAwaiter(op);
 		}
 
-		public UnityWebRequestAwaiter<T> GetAwaiter()
+		public UnityWebRequestAwaiter GetAwaiter()
 		{
 			return _awaiter;
 		}
