@@ -3,9 +3,8 @@
 
 using System;
 using UnityEngine;
-using UnityEngine.Networking;
 
-namespace UnityFx.Tasks
+namespace UnityFx.Tasks.Extensions
 {
 	/// <summary>
 	/// Async/await extensions.

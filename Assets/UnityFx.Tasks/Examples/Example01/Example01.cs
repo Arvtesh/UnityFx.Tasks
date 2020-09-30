@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
+using UnityFx.Tasks.Extensions;
+
 namespace UnityFx.Tasks.Examples
 {
 	/// <summary>
@@ -52,6 +54,11 @@ namespace UnityFx.Tasks.Examples
 			{
 				Debug.LogException(e, this);
 			}
+		}
+
+		private string Tt()
+		{
+			throw new NotImplementedException();
 		}
 
 		private IEnumerator TestCoroutine()

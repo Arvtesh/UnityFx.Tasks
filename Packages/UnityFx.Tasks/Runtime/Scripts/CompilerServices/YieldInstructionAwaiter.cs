@@ -43,8 +43,6 @@ namespace UnityFx.Tasks.CompilerServices
 		public void OnCompleted(Action continuation)
 		{
 			_callback = continuation;
-
-			// NOTE: This call always schedules the continuation on the Unity thread. This differs from Task awaiter behavior (continue on the same thread).
 			TaskUtility.StartCoroutine(this);
 		}
 
