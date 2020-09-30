@@ -54,80 +54,6 @@ namespace UnityFx.Tasks
 		}
 
 		/// <summary>
-		/// Asynchronously loads an asset with the specified name from <see cref="Resources"/>.
-		/// </summary>
-		/// <param name="assetPath">Path the asset in the <see cref="Resources"/> folder.</param>
-		/// <exception cref="ArgumentNullException">Thrown if <paramref name="assetPath"/> is <see langword="null"/>.</exception>
-		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation state.</returns>
-		/// <seealso cref="LoadAssetAsync(string, CancellationToken)"/>
-		public static Task<UnityEngine.Object> LoadAssetAsync(string assetPath)
-		{
-			return LoadAssetAsync(assetPath, CancellationToken.None);
-		}
-
-		/// <summary>
-		/// Asynchronously loads an asset with the specified name from <see cref="Resources"/>.
-		/// </summary>
-		/// <param name="assetPath">Path the asset in the <see cref="Resources"/> folder.</param>
-		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
-		/// <exception cref="ArgumentNullException">Thrown if <paramref name="assetPath"/> is <see langword="null"/>.</exception>
-		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation state.</returns>
-		/// <seealso cref="LoadAssetAsync(string)"/>
-		public static Task<UnityEngine.Object> LoadAssetAsync(string assetPath, CancellationToken cancellationToken)
-		{
-			if (assetPath == null)
-			{
-				throw new ArgumentNullException(nameof(assetPath));
-			}
-
-			var op = Resources.LoadAsync(assetPath);
-
-			if (op == null)
-			{
-				return Task.FromException<UnityEngine.Object>(new InvalidOperationException($"Cannot load asset '{assetPath}' from resources."));
-			}
-
-			return op.ToTask(cancellationToken);
-		}
-
-		/// <summary>
-		/// Asynchronously loads an asset with the specified name and type from <see cref="Resources"/>.
-		/// </summary>
-		/// <param name="assetPath">Path the asset in the <see cref="Resources"/> folder.</param>
-		/// <exception cref="ArgumentNullException">Thrown if <paramref name="assetPath"/> is <see langword="null"/>.</exception>
-		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation state.</returns>
-		/// <seealso cref="LoadAssetAsync{T}(string, CancellationToken)"/>
-		public static Task<T> LoadAssetAsync<T>(string assetPath) where T : UnityEngine.Object
-		{
-			return LoadAssetAsync<T>(assetPath, CancellationToken.None);
-		}
-
-		/// <summary>
-		/// Asynchronously loads an asset with the specified name and type from <see cref="Resources"/>.
-		/// </summary>
-		/// <param name="assetPath">Path the asset in the <see cref="Resources"/> folder.</param>
-		/// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
-		/// <exception cref="ArgumentNullException">Thrown if <paramref name="assetPath"/> is <see langword="null"/>.</exception>
-		/// <returns>A <see cref="Task{TResult}"/> that can be used to track the operation state.</returns>
-		/// <seealso cref="LoadAssetAsync{T}(string)"/>
-		public static Task<T> LoadAssetAsync<T>(string assetPath, CancellationToken cancellationToken) where T : UnityEngine.Object
-		{
-			if (assetPath == null)
-			{
-				throw new ArgumentNullException(nameof(assetPath));
-			}
-
-			var op = Resources.LoadAsync(assetPath, typeof(T));
-
-			if (op == null)
-			{
-				return Task.FromException<T>(new InvalidOperationException($"Cannot load asset '{assetPath}' from resources."));
-			}
-
-			return op.ToTask<T>(cancellationToken);
-		}
-
-		/// <summary>
 		/// Asynchronously loads a scene with the specified name.
 		/// </summary>
 		/// <param name="sceneName">Name of the scene to load.</param>
@@ -153,7 +79,7 @@ namespace UnityFx.Tasks
 		/// <seealso cref="LoadSceneAsync(string, LoadSceneMode)"/>
 		public static Task<Scene> LoadSceneAsync(string sceneName, LoadSceneMode loadMode, CancellationToken cancellationToken)
 		{
-			if (sceneName == null)
+			if (sceneName is null)
 			{
 				throw new ArgumentNullException(nameof(sceneName));
 			}
@@ -172,7 +98,10 @@ namespace UnityFx.Tasks
 
 				if (cancellationToken.CanBeCanceled)
 				{
-					cancellationToken.Register(() => result.TrySetCanceled(cancellationToken));
+					cancellationToken.Register(() =>
+					{
+						result.TrySetCanceled(cancellationToken);
+					});
 				}
 
 				op.completed += o =>
@@ -184,7 +113,7 @@ namespace UnityFx.Tasks
 					{
 						var s = SceneManager.GetSceneAt(i);
 
-						if (s.name == sceneName)
+						if (string.CompareOrdinal(s.name, sceneName) == 0)
 						{
 							scene = s;
 							break;
@@ -209,7 +138,7 @@ namespace UnityFx.Tasks
 			}
 			else
 			{
-				return Task.FromException<Scene>(new InvalidOperationException($"Cannot load scene '{sceneName}'. Please make sure it has been added to the build settings or the {nameof(AssetBundle)} has been loaded successfully."));
+				return Task.FromException<Scene>(new InvalidOperationException($"Cannot load scene '{sceneName}'. Please make sure it has been added to the build settings or the source {nameof(AssetBundle)} has been loaded successfully."));
 			}
 		}
 

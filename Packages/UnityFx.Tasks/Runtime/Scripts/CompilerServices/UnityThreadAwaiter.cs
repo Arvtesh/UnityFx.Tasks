@@ -20,13 +20,7 @@ namespace UnityFx.Tasks.CompilerServices
 			_unityThreadContext = unityThreadContext;
 		}
 
-		public bool IsCompleted
-		{
-			get
-			{
-				return SynchronizationContext.Current == _unityThreadContext;
-			}
-		}
+		public bool IsCompleted => SynchronizationContext.Current == _unityThreadContext;
 
 		public void GetResult()
 		{

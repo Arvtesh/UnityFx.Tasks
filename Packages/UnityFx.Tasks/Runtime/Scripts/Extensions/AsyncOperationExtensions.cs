@@ -207,30 +207,37 @@ namespace UnityFx.Tasks
 
 				op.completed += o =>
 				{
-					var result = GetResult<T>(op);
-
-					if (result != null)
+					try
 					{
-						// NOTE: TrySetResult() failure means that the operation was cancelled, thus all assets should be unloaded.
-						if (!tcs.TrySetResult(result))
+						var result = GetResult<T>(op);
+
+						if (result != null)
 						{
-							if (op.allAssets != null)
+							// NOTE: TrySetResult() failure means that the operation was cancelled, thus all assets should be unloaded.
+							if (!tcs.TrySetResult(result))
 							{
-								foreach (var obj in op.allAssets)
+								if (op.allAssets != null)
 								{
-									UnityEngine.Object.Destroy(obj);
+									foreach (var obj in op.allAssets)
+									{
+										UnityEngine.Object.Destroy(obj);
+									}
+								}
+
+								if (op.asset)
+								{
+									UnityEngine.Object.Destroy(op.asset);
 								}
 							}
-
-							if (op.asset != null)
-							{
-								UnityEngine.Object.Destroy(op.asset);
-							}
+						}
+						else
+						{
+							tcs.TrySetException(new UnityAssetLoadException(typeof(T)));
 						}
 					}
-					else
+					catch (Exception e)
 					{
-						tcs.TrySetException(new UnityAssetLoadException(typeof(T)));
+						tcs.TrySetException(new UnityAssetLoadException(typeof(T), e));
 					}
 				};
 
@@ -311,15 +318,22 @@ namespace UnityFx.Tasks
 		{
 			if (typeof(T).IsArray)
 			{
-				var assets = op.allAssets;
-
-				// NOTE: Cannot just cast op.allAssets to T (this would return null), have to create new array.
-				if (assets != null && assets.Length > 0)
+				if (typeof(T) == typeof(UnityEngine.Object[]))
 				{
-					var elementType = typeof(T).GetElementType();
-					var result = Array.CreateInstance(elementType, assets.Length);
-					assets.CopyTo(result, 0);
-					return result as T;
+					return op.allAssets as T;
+				}
+				else
+				{
+					var assets = op.allAssets;
+
+					// NOTE: Cannot just cast op.allAssets to T (this would return null), have to create new array.
+					if (assets != null && assets.Length > 0)
+					{
+						var elementType = typeof(T).GetElementType();
+						var result = Array.CreateInstance(elementType, assets.Length);
+						assets.CopyTo(result, 0);
+						return result as T;
+					}
 				}
 			}
 			else if (op.asset is T result)
@@ -327,7 +341,7 @@ namespace UnityFx.Tasks
 				return result;
 			}
 
-			return default(T);
+			return default;
 		}
 	}
 }

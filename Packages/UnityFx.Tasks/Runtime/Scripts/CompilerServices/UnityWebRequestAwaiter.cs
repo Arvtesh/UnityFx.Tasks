@@ -23,13 +23,7 @@ namespace UnityFx.Tasks.CompilerServices
 			_op = op;
 		}
 
-		public bool IsCompleted
-		{
-			get
-			{
-				return _op.webRequest.isDone;
-			}
-		}
+		public bool IsCompleted => _op.webRequest.isDone;
 
 		public void GetResult()
 		{

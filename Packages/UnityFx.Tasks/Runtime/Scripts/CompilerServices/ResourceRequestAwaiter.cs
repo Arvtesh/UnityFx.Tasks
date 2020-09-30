@@ -21,22 +21,11 @@ namespace UnityFx.Tasks.CompilerServices
 			_op = op;
 		}
 
-		public bool IsCompleted
-		{
-			get
-			{
-				return _op.isDone;
-			}
-		}
+		public bool IsCompleted => _op.isDone;
 
 		public UnityEngine.Object GetResult()
 		{
-			if (!_op.asset)
-			{
-				throw new UnityAssetLoadException();
-			}
-
-			return _op.asset;
+			return _op.asset; ;
 		}
 
 		public void OnCompleted(Action continuation)
@@ -46,7 +35,7 @@ namespace UnityFx.Tasks.CompilerServices
 
 		public void UnsafeOnCompleted(Action continuation)
 		{
-			_op.completed += op => continuation();
+			OnCompleted(continuation);
 		}
 	}
 }

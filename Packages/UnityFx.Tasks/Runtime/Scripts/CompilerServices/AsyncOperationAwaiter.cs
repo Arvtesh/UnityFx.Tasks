@@ -21,13 +21,7 @@ namespace UnityFx.Tasks.CompilerServices
 			_op = op;
 		}
 
-		public bool IsCompleted
-		{
-			get
-			{
-				return _op.isDone;
-			}
-		}
+		public bool IsCompleted => _op.isDone;
 
 		public void GetResult()
 		{
@@ -40,7 +34,7 @@ namespace UnityFx.Tasks.CompilerServices
 
 		public void UnsafeOnCompleted(Action continuation)
 		{
-			_op.completed += op => continuation();
+			OnCompleted(continuation);
 		}
 	}
 }

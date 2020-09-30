@@ -30,13 +30,7 @@ namespace UnityFx.Tasks.CompilerServices
 			_yieldValue = op;
 		}
 
-		public bool IsCompleted
-		{
-			get
-			{
-				return _current == null && _yieldValue == null;
-			}
-		}
+		public bool IsCompleted => _current == null && _yieldValue == null;
 
 		public void GetResult()
 		{
@@ -63,13 +57,7 @@ namespace UnityFx.Tasks.CompilerServices
 
 		#region IEnumerator
 
-		object IEnumerator.Current
-		{
-			get
-			{
-				return _current;
-			}
-		}
+		object IEnumerator.Current => _current;
 
 		bool IEnumerator.MoveNext()
 		{

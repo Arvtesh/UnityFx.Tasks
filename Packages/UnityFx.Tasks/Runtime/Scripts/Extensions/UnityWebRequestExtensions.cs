@@ -27,9 +27,14 @@ namespace UnityFx.Tasks
 			return SendWebRequestAsync<object>(request, null, cancellationToken);
 		}
 
-		public static Task<T> SendWebRequestAsync<T>(this UnityWebRequest request) where T : class
+		public static Task<TResult> SendWebRequestAsync<TResult>(this UnityWebRequest request) where TResult : class
 		{
-			return SendWebRequestAsync<T>(request, null, CancellationToken.None);
+			return SendWebRequestAsync<TResult>(request, null, CancellationToken.None);
+		}
+
+		public static Task<TResult> SendWebRequestAsync<TResult>(this UnityWebRequest request, CancellationToken cancellationToken) where TResult : class
+		{
+			return SendWebRequestAsync<TResult>(request, null, cancellationToken);
 		}
 
 		public static Task<TResult> SendWebRequestAsync<TResult>(this UnityWebRequest request, Func<DownloadHandler, TResult> requestResultParser, CancellationToken cancellationToken) where TResult : class
@@ -106,7 +111,7 @@ namespace UnityFx.Tasks
 							}
 							else
 							{
-								var result = GetResultInternal(request, requestResultParser);
+								var result = GetResult(request, requestResultParser);
 								tcs.TrySetResult(result);
 							}
 						}
@@ -126,37 +131,11 @@ namespace UnityFx.Tasks
 			}
 		}
 
-		internal static T GetResult<T>(this UnityWebRequest request) where T : class
-		{
-			ThrowIfNotCompleted(request);
-			ThrowIfFailed(request);
-
-			return GetResultInternal<T>(request, null);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void ThrowIfNotCompleted(this UnityWebRequest request)
-		{
-			if (!request.isDone)
-			{
-				throw new InvalidOperationException("The request is expected to be completed.");
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void ThrowIfFailed(this UnityWebRequest request)
-		{
-			if (request.isHttpError || request.isNetworkError)
-			{
-				throw new UnityWebRequestException(request.error, request.responseCode);
-			}
-		}
-
 		#endregion
 
 		#region implementation
 
-		private static T GetResultInternal<T>(UnityWebRequest request, Func<DownloadHandler, T> requestResultParser) where T : class
+		private static T GetResult<T>(UnityWebRequest request, Func<DownloadHandler, T> requestResultParser) where T : class
 		{
 			var dh = request.downloadHandler;
 
