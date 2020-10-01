@@ -40,19 +40,56 @@ namespace UnityFx.Tasks
 		}
 
 		/// <summary>
-		/// Awaits the one frame.
+		/// Delays execution for the specified <paramref name="delay"/>.
 		/// </summary>
-		public static CompilerServices.SkipFramesAwaitable SkipFrameAsync()
+		public static CompilerServices.TimeDelayAwaitable Delay(TimeSpan delay, TimerType timerType = TimerType.Scaled)
 		{
-			return new CompilerServices.SkipFramesAwaitable(1);
+			var doubleSeconds = delay.TotalSeconds;
+
+			if (doubleSeconds > float.MaxValue)
+			{
+				throw new ArgumentOutOfRangeException(nameof(delay), "Delay value is too large.");
+			}
+			else if (doubleSeconds < 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(delay), "Delay cannot be negative.");
+			}
+
+			return new CompilerServices.TimeDelayAwaitable((float)delay.TotalSeconds, timerType);
 		}
 
 		/// <summary>
-		/// Awaits the specified number of frames.
+		/// Delays execution for the specified number of seconds.
 		/// </summary>
-		public static CompilerServices.SkipFramesAwaitable SkipFramesAsync(int numberOfFramesToSkip)
+		public static CompilerServices.TimeDelayAwaitable DelaySeconds(float delaySeconds, TimerType timerType = TimerType.Scaled)
 		{
-			return new CompilerServices.SkipFramesAwaitable(numberOfFramesToSkip);
+			if (delaySeconds < 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(delaySeconds), "Delay cannot be negative.");
+			}
+
+			return new CompilerServices.TimeDelayAwaitable(delaySeconds, timerType);
+		}
+
+		/// <summary>
+		/// Delays execution for the specified number of frames.
+		/// </summary>
+		public static CompilerServices.SkipFramesAwaitable DelayFrames(int delayFrames)
+		{
+			if (delayFrames < 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(delayFrames), "Delay cannot be negative.");
+			}
+
+			return new CompilerServices.SkipFramesAwaitable(delayFrames);
+		}
+
+		/// <summary>
+		/// Delays execution for one frame.
+		/// </summary>
+		public static CompilerServices.SkipFramesAwaitable DelayFrame()
+		{
+			return new CompilerServices.SkipFramesAwaitable(1);
 		}
 
 		/// <summary>
@@ -159,12 +196,7 @@ namespace UnityFx.Tasks
 				throw new ArgumentNullException(nameof(enumerator));
 			}
 
-			if (_workerBehaviour == null)
-			{
-				throw new InvalidOperationException();
-			}
-
-			return _workerBehaviour.StartCoroutine(enumerator);
+			return GetUtilityBehaviour().StartCoroutine(enumerator);
 		}
 
 		/// <summary>
@@ -211,23 +243,31 @@ namespace UnityFx.Tasks
 			}
 		}
 
-		internal static void Initialize(GameObject go, SynchronizationContext mainThreadContext)
+		internal static void Initialize(SynchronizationContext mainThreadContext)
 		{
-			Debug.Assert(_workerBehaviour is null);
+			Debug.Assert(_unityThreadContext is null);
 
 			// NOTE: Should only be called once.
 			_unityThreadContext = mainThreadContext;
-			_workerBehaviour = go.AddComponent<TaskUtilityBehaviour>();
 		}
 
 		internal static void Schedule(Action action, int numberOfFramesToSkip)
 		{
 			Debug.Assert(action != null);
-			Debug.Assert(_workerBehaviour != null);
 
 			if (numberOfFramesToSkip > 0)
 			{
-				_workerBehaviour.AddCompletionCallback(action, numberOfFramesToSkip);
+				GetUtilityBehaviour().AddCompletionCallback(action, numberOfFramesToSkip);
+			}
+		}
+
+		internal static void Schedule(Action action, float delay, TimerType timerType)
+		{
+			Debug.Assert(action != null);
+
+			if (delay > 0)
+			{
+				GetUtilityBehaviour().AddCompletionCallback(action, delay, timerType);
 			}
 		}
 
@@ -237,9 +277,16 @@ namespace UnityFx.Tasks
 
 		private sealed class TaskUtilityBehaviour : MonoBehaviour
 		{
+			private class TimerData
+			{
+				public TimerType TimerType;
+				public float Timer;
+				public float StartTime;
+				public Action Callback;
+			}
+
 			private Dictionary<int, List<Action>> _skipFramesMap;
-			private Dictionary<UnityWebRequest, Action> _ops;
-			private List<KeyValuePair<UnityWebRequest, Action>> _opsToRemove;
+			private List<TimerData> _timers;
 
 			public void AddCompletionCallback(Action action, int numberOfFramesToSkip)
 			{
@@ -258,6 +305,22 @@ namespace UnityFx.Tasks
 				{
 					_skipFramesMap.Add(targetFrame, new List<Action>() { action });
 				}
+			}
+
+			public void AddCompletionCallback(Action action, float delay, TimerType timerType)
+			{
+				if (_timers is null)
+				{
+					_timers = new List<TimerData>();
+				}
+
+				_timers.Add(new TimerData()
+				{
+					TimerType = timerType,
+					Timer = delay,
+					StartTime = timerType == TimerType.Realtime ? Time.realtimeSinceStartup : 0,
+					Callback = action
+				});
 			}
 
 			private void Update()
@@ -283,7 +346,77 @@ namespace UnityFx.Tasks
 						}
 					}
 				}
+
+				if (_timers != null)
+				{
+					var i = 0;
+
+					while (i < _timers.Count)
+					{
+						var timer = _timers[i];
+						var timerEnd = false;
+
+						if (timer.TimerType == TimerType.Realtime)
+						{
+							if (Time.realtimeSinceStartup - timer.StartTime > timer.Timer)
+							{
+								timerEnd = true;
+							}
+						}
+						else
+						{
+							if (timer.TimerType == TimerType.Scaled)
+							{
+								timer.Timer -= Time.deltaTime;
+							}
+							else
+							{
+								timer.Timer -= Time.unscaledDeltaTime;
+							}
+
+							if (timer.Timer <= 0)
+							{
+								timerEnd = true;
+							}
+						}
+
+						if (timerEnd)
+						{
+							_timers.RemoveAt(i);
+
+							try
+							{
+								timer.Callback();
+							}
+							catch (Exception e)
+							{
+								Debug.LogException(e);
+							}
+						}
+						else
+						{
+							++i;
+						}
+					}
+				}
 			}
+		}
+
+		private static TaskUtilityBehaviour GetUtilityBehaviour()
+		{
+			if (_workerBehaviour == null)
+			{
+				var go = new GameObject("UnityFx.Tasks")
+				{
+					hideFlags = HideFlags.HideAndDontSave
+				};
+
+				GameObject.DontDestroyOnLoad(go);
+
+				_workerBehaviour = go.AddComponent<TaskUtilityBehaviour>();
+			}
+
+			return _workerBehaviour;
 		}
 
 		#endregion

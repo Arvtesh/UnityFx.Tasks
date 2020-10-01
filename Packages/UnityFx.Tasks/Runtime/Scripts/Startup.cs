@@ -23,19 +23,7 @@ namespace UnityFx.Tasks
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void Initialize()
 		{
-			var context = SynchronizationContext.Current;
-			Debug.Assert(context != null, "SynchronizationContext is expected to be set by Unity.");
-
-			// Create helper GameObject
-			var go = new GameObject("UnityFx.Tasks")
-			{
-				hideFlags = HideFlags.HideAndDontSave
-			};
-
-			GameObject.DontDestroyOnLoad(go);
-
-			// Initialize library components.
-			TaskUtility.Initialize(go, context);
+			TaskUtility.Initialize(SynchronizationContext.Current);
 		}
 	}
 }

@@ -12,6 +12,7 @@ namespace UnityFx.Tasks.CompilerServices
 	/// Provides an awaitable object that allows for configured awaits on <see cref="UnityWebRequestAsyncOperation"/>.
 	/// This type is intended for compiler use only.
 	/// </summary>
+	/// <seealso cref="UnityWebRequestAwaitable"/>
 	/// <seealso cref="UnityWebRequestAsyncOperation"/>
 	/// <seealso cref="UnityWebRequest"/>
 	public struct UnityWebRequestAwaiter : ICriticalNotifyCompletion

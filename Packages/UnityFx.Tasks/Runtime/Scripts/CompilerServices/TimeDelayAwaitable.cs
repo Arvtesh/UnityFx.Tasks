@@ -9,17 +9,17 @@ namespace UnityFx.Tasks.CompilerServices
 	/// Provides an awaitable object that allows skipping a specified number of frames.
 	/// This type is intended for compiler use only.
 	/// </summary>
-	/// <seealso cref="SkipFramesAwaiter"/>
-	public struct SkipFramesAwaitable
+	/// <seealso cref="TimeDelayAwaiter"/>
+	public struct TimeDelayAwaitable
 	{
-		private readonly SkipFramesAwaiter _awaiter;
+		private readonly TimeDelayAwaiter _awaiter;
 
-		public SkipFramesAwaitable(int numberOfFramesToSkip)
+		public TimeDelayAwaitable(float delay, TimerType timerType)
 		{
-			_awaiter = new SkipFramesAwaiter(numberOfFramesToSkip);
+			_awaiter = new TimeDelayAwaiter(delay, timerType);
 		}
 
-		public SkipFramesAwaiter GetAwaiter()
+		public TimeDelayAwaiter GetAwaiter()
 		{
 			return _awaiter;
 		}
